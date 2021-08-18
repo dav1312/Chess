@@ -29,8 +29,7 @@
 			font-size: calc(20px * 1.5);
 			margin: 0 0 10px 0;
 		}
-		input,
-		button {
+		input {
 			border-radius: calc(4px * 1.5);
 			color: white;
 			border: 0;
@@ -38,19 +37,20 @@
 			height: calc(25px * 1.5);
 			font-size: calc(12px * 1.5);
 		}
-		input {
+		input:not(.button) {
 			background-color: #40444b;
 			padding-left: calc(6px * 1.5);
 			width: 80px;
 		}
-		button {
+		.button {
 			background: #4f545c;
 			width: 100%;
+			text-align: center;
 		}
-		button:hover {
+		.button:hover {
 			background: #484d54;
 		}
-		button:active {
+		.button:active {
 			background: #42464d;
 		}
 	</style>
@@ -126,7 +126,7 @@
 										</td>
 									</tr>
 									<td colspan="3">
-										<button onclick="CalculateElo()">Calculate</button>
+										<input class="button" value="Calculate" size="1" onclick="CalculateElo()"></input>
 									</td>
 								</tbody>
 							</table>
@@ -142,12 +142,16 @@
 										<td>Games</td>
 									</tr>
 									<tr>
-										<td><input name="points" value="0" size="5"> </td>
+										<td>
+											<input name="points" value="0" size="5">
+										</td>
 										<td>/</td>
-										<td><input name="totalgames" value="0" size="5"></td>
+										<td>
+											<input name="totalgames" value="0" size="5">
+										</td>
 									</tr>
 									<td colspan="3">
-										<button onclick="CalculateEloFromScore()">Calculate</button>
+										<input class="button" value="Calculate" size="1" onclick="CalculateEloFromScore()"></input>
 									</td>
 								</tbody>
 							</table>
@@ -167,7 +171,7 @@
 									</tr>
 									<tr>
 										<td>
-											<button onclick="CalculateEloFromPercent()">Calculate</button>
+											<input class="button" value="Calculate" size="1" onclick="CalculateEloFromPercent()"></input>
 										</td>
 									</tr>
 								</tbody>
@@ -183,7 +187,7 @@
 									<tr>
 										<td>
 											Elo Difference:
-											<input name="difference" value="+0" size="8">
+											<input name="difference" value="+0" style="width:120px;text-align:center;padding:0">
 										</td>
 									</tr>
 								</tbody>
