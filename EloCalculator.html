@@ -83,7 +83,7 @@
 				Sign = "+";
 			}
 			document.percent.winning.value = Math.round(percentage * 10000) / 100;
-			document.Elo.difference.value = Sign + Math.round(EloDifference);
+			document.Elo.difference.value = Sign + Math.round((EloDifference + Number.EPSILON) * 100) / 100;
 		}
 		function CalculateEloFromPercent() {
 			var percentage = document.percent.winning.value / 100;
@@ -92,7 +92,7 @@
 			if (EloDifference > 0) {
 				Sign = "+";
 			}
-			document.Elo.difference.value = Sign + Math.round(EloDifference);
+			document.Elo.difference.value = Sign + Math.round((EloDifference + Number.EPSILON) * 100) / 100;
 		}
 	</script>
 <body>
