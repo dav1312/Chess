@@ -45,7 +45,7 @@
 		}
 		button {
 			background: #4f545c;
-			width: 120px;
+			width: 100px;
 		}
 		button:hover {
 			background: #484d54;
@@ -126,7 +126,7 @@
 										</td>
 									</tr>
 									<td>
-										<input type="button" value="Calculate" onclick="CalculateElo()" class="button">
+										<button onclick="CalculateElo()">Calculate</button>
 									</td>
 								</tbody>
 							</table>
@@ -147,7 +147,7 @@
 										<td><input name="totalgames" value="0" size="5"></td>
 									</tr>
 									<td>
-										<input type="button" value="Calculate" onclick="CalculateEloFromScore()" class="button">
+										<button onclick="CalculateEloFromScore()">Calculate</button>
 									</td>
 								</tbody>
 							</table>
@@ -167,7 +167,7 @@
 									</tr>
 									<tr>
 										<td>
-											<input type="button" value="Calculate" onclick="CalculateEloFromPercent()" class="button">
+											<button onclick="CalculateEloFromPercent()">Calculate</button>
 										</td>
 									</tr>
 								</tbody>
@@ -177,15 +177,13 @@
 				</tr>
 				<tr>
 					<td colspan="3">
-						<form>
+						<form name="Elo" action="">
 							<table>
 								<tbody>
 									<tr>
 										<td>
-											<form name="Elo" action="">
-												Elo difference:
-												<input name="difference" value="+0" size="8">
-											</form>
+											Elo difference:
+											<input name="difference" value="+0" size="8">
 										</td>
 									</tr>
 								</tbody>
