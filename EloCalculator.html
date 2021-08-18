@@ -1,0 +1,200 @@
+<html>
+<head>
+	<title>ELO Calculator</title>
+	<style>
+		body {
+			background-color: #2f3136;
+		}
+		table {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 100%;
+			width: auto;
+		}
+		tbody {
+			margin: 0;
+			padding: 20px;
+			background-color: #36393f;
+			border-radius: 1em;
+			box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%),
+				0 8px 12px rgb(0 0 0 / 15%);
+		}
+		* {
+			font-family: Montserrat;
+			color: white;
+		}
+		h1 {
+			text-align: center;
+			font-size: calc(20px * 1.5);
+			margin: 0 0 10px 0;
+		}
+		input,
+		button {
+			border-radius: calc(4px * 1.5);
+			color: white;
+			border: 0;
+			outline: 0;
+			height: calc(25px * 1.5);
+			font-size: calc(12px * 1.5);
+		}
+		input {
+			background-color: #40444b;
+			padding-left: calc(6px * 1.5);
+			width: 100px;
+		}
+		button {
+			background: #4f545c;
+			width: 120px;
+		}
+		button:hover {
+			background: #484d54;
+		}
+		button:active {
+			background: #42464d;
+		}
+	</style>
+	<script>
+		function CalculateElo() {
+			var wins = document.score.wins.value * 1;
+			var draws = document.score.draws.value * 1;
+			var losses = document.score.losses.value * 1;
+			var score = wins + draws / 2;
+			var total = wins + draws + losses;
+			var percentage = score / total;
+			var EloDifference = (-400 * Math.log(1 / percentage - 1)) / Math.LN10;
+			var Sign = "";
+			if (EloDifference > 0) {
+				Sign = "+";
+			}
+			document.points.points.value = score;
+			document.points.totalgames.value = total;
+			document.percent.winning.value = Math.round(percentage * 10000) / 100;
+			document.Elo.difference.value =
+				Sign + Math.round((EloDifference + Number.EPSILON) * 100) / 100;
+		}
+		function CalculateEloFromScore() {
+			var score = document.points.points.value;
+			var total = document.points.totalgames.value;
+			var percentage = score / total;
+			var EloDifference = (-400 * Math.log(1 / percentage - 1)) / Math.LN10;
+			var Sign = "";
+			if (EloDifference > 0) {
+				Sign = "+";
+			}
+			document.percent.winning.value = Math.round(percentage * 10000) / 100;
+			document.Elo.difference.value = Sign + Math.round(EloDifference);
+		}
+		function CalculateEloFromPercent() {
+			var percentage = document.percent.winning.value / 100;
+			var EloDifference = (-400 * Math.log(1 / percentage - 1)) / Math.LN10;
+			var Sign = "";
+			if (EloDifference > 0) {
+				Sign = "+";
+			}
+			document.Elo.difference.value = Sign + Math.round(EloDifference);
+		}
+	</script>
+<body>
+	<div align="center">
+		<table>
+			<tbody>
+				<tr>
+					<td colspan="3">
+						<h1 align="center">ELO Calculator</h1>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<form name="score" action="">
+							<table>
+								<tbody>
+									<tr>
+										<td>Wins</td>
+										<td>Losses</td>
+										<td>Draws</td>
+									</tr>
+									<tr>
+										<td>
+											<input name="wins" value="0" size="5">
+										</td>
+										<td>
+											<input name="losses" value="0" size="5">
+										</td>
+										<td>
+											<input name="draws" value="0" size="5">
+										</td>
+									</tr>
+									<td>
+										<input type="button" value="Calculate" onclick="CalculateElo()" class="button">
+									</td>
+								</tbody>
+							</table>
+						</form>
+					</td>
+					<td>
+						<form name="points" action="">
+							<table>
+								<tbody>
+									<tr>
+										<td>Points</td>
+										<td></td>
+										<td>Games</td>
+									</tr>
+									<tr>
+										<td><input name="points" value="0" size="5"> </td>
+										<td>/</td>
+										<td><input name="totalgames" value="0" size="5"></td>
+									</tr>
+									<td>
+										<input type="button" value="Calculate" onclick="CalculateEloFromScore()" class="button">
+									</td>
+								</tbody>
+							</table>
+						</form>
+					</td>
+					<td>
+						<form name="percent" action="">
+							<table>
+								<tbody>
+									<tr>
+										<td>Winning percentage</td>
+									</tr>
+									<tr>
+										<td>
+											<input name="winning" value="50" size="5">
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<input type="button" value="Calculate" onclick="CalculateEloFromPercent()" class="button">
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<form>
+							<table>
+								<tbody>
+									<tr>
+										<td>
+											<form name="Elo" action="">
+												Elo difference:
+												<input name="difference" value="+0" size="8">
+											</form>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+<html>
