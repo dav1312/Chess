@@ -2,8 +2,18 @@
 <head>
 	<title>Elo Calculator</title>
 	<style>
+		:root {
+			--bg1: #43658B;
+			--bg2: #4E89AE;
+			--bttnbg: #ED6663;
+			--bttnbghv: #DE5F5D;
+			--bttnbgact: #D15A58;
+			--bttncolor: #FFF;
+			--inputbg: #FFF;
+			--inputcolor: #1A1A1A
+		}
 		body {
-			background-color: #2f3136
+			background-color: var(--bg1)
 		}
 		table {
 			display: flex;
@@ -15,12 +25,12 @@
 		tbody {
 			margin: 4px;
 			padding: 8px;
-			background-color: #36393f;
+			background-color: var(--bg2);
 			border-radius: 8px
 		}
 		* {
 			font-family: Montserrat;
-			color: white
+			color: #FFF
 		}
 		h1 {
 			font-size: 30px;
@@ -41,20 +51,25 @@
 			font-size: 18px
 		}
 		input:not(.button) {
-			background-color: #40444b;
+			background-color: var(--inputbg);
+			color: var(--inputcolor);
 			padding-left: 9px;
 			width: 80px
 		}
 		.button {
-			background: #4f545c;
+			background-color: var(--bttnbg);
+			color: var(--bttncolor);
+			transition: .15s;
 			width: 100%;
 			text-align: center
 		}
 		.button:hover {
-			background: #484d54
+			background: var(--bttnbghv);
+			transition: .15s
 		}
 		.button:active {
-			background: #42464d
+			background: var(--bttnbgact);
+			transition: .15s
 		}
 	</style>
 	<script>
