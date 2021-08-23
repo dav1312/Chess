@@ -112,6 +112,11 @@
 			}
 			document.Elo.difference.value = Sign + Math.round((EloDifference + Number.EPSILON) * 100) / 100;
 		}
+		function CalculatePercentFromElo() {
+			var EloDifference = document.Elo.difference.value * 1;
+			var WinningPct = (1 / (Math.exp(-(EloDifference * Math.LN10) / 400) + 1)) * 100;
+			document.percent.winning.value = Math.round((WinningPct + Number.EPSILON) * 1000) / 1000;
+		}
 	</script>
 <body>
 	<div align="center">
@@ -206,6 +211,7 @@
 										<td>
 											Elo Difference:
 											<input name="difference" value="+0" style="width:120px">
+											<input type="button" class="button" value="Calculate" size="1" onclick="CalculatePercentFromElo()" style="width: 120px">
 										</td>
 									</tr>
 								</tbody>
