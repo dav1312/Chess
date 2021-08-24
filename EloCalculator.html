@@ -1,5 +1,6 @@
 <html>
 <head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Elo Calculator</title>
 	<style>
 		:root {
@@ -71,6 +72,18 @@
 			background: var(--bttnbgact);
 			transition: .15s
 		}
+		@media only screen and (max-width: 760px) {
+			.inputs > td,
+			.elodiff input {
+				display: block
+			}
+			.elodiff input {
+				margin: auto auto 4px auto
+			}
+			.elodiff input:last-child {
+				margin: auto
+			}
+		}
 	</style>
 	<script>
 		function CalculateElo() {
@@ -122,12 +135,12 @@
 	<div align="center">
 		<table>
 			<tbody style="box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)">
-				<tr>
+				<tr class="title">
 					<td colspan="3">
 						<h1 align="center">Elo Calculator</h1>
 					</td>
 				</tr>
-				<tr>
+				<tr class="inputs">
 					<td>
 						<form name="score" action="">
 							<table>
@@ -202,7 +215,7 @@
 						</form>
 					</td>
 				</tr>
-				<tr>
+				<tr class="elodiff">
 					<td colspan="3">
 						<form name="Elo" action="" style="margin-bottom:0">
 							<table>
