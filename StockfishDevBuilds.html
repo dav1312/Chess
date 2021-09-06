@@ -1,0 +1,95 @@
+<html>
+<head>
+	<title>Stockfish Dev Builds for Windows</title>
+	<style>
+		:root {
+			--bg1: #2E593B;
+			--bg2: #447E5E;
+			--bttnbg: #43AC6A;
+			--bttnbghv: #3F9F63;
+			--bttnbgact: #3B945C;
+			--bttncolor: #FFF
+		}
+		body {
+			background-color: var(--bg1)
+		}
+		table {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			height: 100%;
+			width: auto
+		}
+		tbody {
+			padding: 12px;
+			background-color: var(--bg2);
+			border-radius: 8px;
+			box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)
+		}
+		* {
+			font-family: Montserrat;
+			color: #FFF
+		}
+		h1 {
+			font-size: 22px;
+			margin: 0
+		}
+		th {
+			padding-bottom: 2px;
+		}
+		td {
+			font-size: 18px
+		}
+		.button {
+			background-color: var(--bttnbg);
+			color: var(--bttncolor);
+			display: flex;
+			justify-content: center;
+			padding: 6px 10px;
+			border-radius: 4px;
+			text-decoration: none
+		}
+		.button:hover {
+			background: var(--bttnbghv);
+			transition: .15s
+		}
+		.button:active {
+			background: var(--bttnbgact);
+			transition: .15s
+		}
+		.description {
+			font-size: 12px
+		}
+	</style>
+	</head>
+<body>
+	<table width="100%">
+		<tbody>
+			<tr>
+				<th colspan="2"><h1>Latest Stockfish Dev Builds for Windows</h1></th>
+			</tr>
+			<tr>
+				<td><b>BMI2</b></td>
+				<td rowspan="2"><a href="http://abrok.eu/stockfish/latest/win/stockfish_x64_bmi2.zip" class="button">Download</a></td>
+			</tr>
+			<tr>
+				<td class="description">4th Gen Intel CPUs and newer and Zen 3 AMD CPUs</td>
+			</tr>
+			<tr>
+				<td><b>AVX2</b></td>
+				<td rowspan="2"><a href="http://abrok.eu/stockfish/latest/win/stockfish_x64_avx2.zip" class="button">Download</a></td>
+			</tr>
+			<tr>
+				<td class="description">Zen, Zen + and Zen 2 AMD CPUs</td>
+			</tr>
+			<tr>
+				<td><b>POPCNT</b></td>
+				<td rowspan="2"><a href="http://abrok.eu/stockfish/latest/win/stockfish_x64_modern.zip" class="button">Download</a></td>
+			</tr>
+			<tr>
+				<td class="description">Other CPUs</td>
+			</tr>
+		</tbody>
+	</table>
+</body>
+</html>
