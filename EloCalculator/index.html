@@ -100,9 +100,9 @@
 			}
 			document.points.points.value = score;
 			document.points.totalgames.value = total;
-			document.percent.winning.value = Math.round(percentage * 10000) / 100;
+			document.percent.winning.value = Math.round((percentage + Number.EPSILON) * 100000) / 1000;
 			document.Elo.difference.value =
-				Sign + Math.round((EloDifference + Number.EPSILON) * 100) / 100;
+				Sign + Math.round((EloDifference + Number.EPSILON) * 1000) / 1000;
 		}
 		function CalculateEloFromScore() {
 			var score = document.points.points.value;
@@ -113,8 +113,8 @@
 			if (EloDifference > 0) {
 				Sign = "+";
 			}
-			document.percent.winning.value = Math.round(percentage * 10000) / 100;
-			document.Elo.difference.value = Sign + Math.round((EloDifference + Number.EPSILON) * 100) / 100;
+			document.percent.winning.value = Math.round((percentage + Number.EPSILON) * 100000) / 1000;
+			document.Elo.difference.value = Sign + Math.round((EloDifference + Number.EPSILON) * 1000) / 1000;
 		}
 		function CalculateEloFromPercent() {
 			var percentage = document.percent.winning.value / 100;
@@ -123,7 +123,7 @@
 			if (EloDifference > 0) {
 				Sign = "+";
 			}
-			document.Elo.difference.value = Sign + Math.round((EloDifference + Number.EPSILON) * 100) / 100;
+			document.Elo.difference.value = Sign + Math.round((EloDifference + Number.EPSILON) * 1000) / 1000;
 		}
 		function CalculatePercentFromElo() {
 			var EloDifference = document.Elo.difference.value * 1;
