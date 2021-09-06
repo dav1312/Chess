@@ -22,7 +22,7 @@
 			width: auto
 		}
 		tbody {
-			padding: 12px 18px 6px 18px;
+			padding: 12px 18px 9px 18px;
 			background-color: var(--bg2);
 			border-radius: 8px;
 			box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)
@@ -36,11 +36,11 @@
 			margin: 0
 		}
 		th {
-			padding: 0 0 6px 0
+			padding: 0 0 3px 0
 		}
 		td {
 			font-size: 24px;
-			padding: 0
+			padding: 3px 0 0 0
 		}
 		.button {
 			background-color: var(--bttnbg);
@@ -61,7 +61,10 @@
 		}
 		.description {
 			font-size: 16px;
-			padding-bottom: 6px
+			padding: 0 0 3px 0
+		}
+		.download {
+			padding: 0
 		}
 	</style>
 	</head>
@@ -73,21 +76,21 @@
 			</tr>
 			<tr>
 				<td><b>BMI2</b></td>
-				<td rowspan="2"><a href="https://abrok.eu/stockfish/latest/win/stockfish_x64_bmi2.zip" class="button">Download</a></td>
+				<td class="download" rowspan="2"><a href="https://abrok.eu/stockfish/latest/win/stockfish_x64_bmi2.zip" class="button">Download</a></td>
 			</tr>
 			<tr>
 				<td class="description">4th Gen Intel CPUs and newer and Zen 3 AMD CPUs</td>
 			</tr>
 			<tr>
 				<td><b>AVX2</b></td>
-				<td rowspan="2"><a href="https://abrok.eu/stockfish/latest/win/stockfish_x64_avx2.zip" class="button">Download</a></td>
+				<td class="download" rowspan="2"><a href="https://abrok.eu/stockfish/latest/win/stockfish_x64_avx2.zip" class="button">Download</a></td>
 			</tr>
 			<tr>
 				<td class="description">Zen, Zen + and Zen 2 AMD CPUs</td>
 			</tr>
 			<tr>
 				<td><b>POPCNT</b></td>
-				<td rowspan="2"><a href="https://abrok.eu/stockfish/latest/win/stockfish_x64_modern.zip" class="button">Download</a></td>
+				<td class="download" rowspan="2"><a href="https://abrok.eu/stockfish/latest/win/stockfish_x64_modern.zip" class="button">Download</a></td>
 			</tr>
 			<tr>
 				<td class="description">Other CPUs</td>
