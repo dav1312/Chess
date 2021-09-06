@@ -36,10 +36,11 @@
 			margin: 0
 		}
 		th {
-			padding-bottom: 2px;
+			padding: 0 0 6px 0
 		}
 		td {
-			font-size: 24px
+			font-size: 24px;
+			padding: 0
 		}
 		.button {
 			background-color: var(--bttnbg);
@@ -60,6 +61,9 @@
 		}
 		.description {
 			font-size: 16px
+		}
+		.description:not(.last) {
+			padding-bottom: 6px
 		}
 	</style>
 	</head>
@@ -88,7 +92,7 @@
 				<td rowspan="2"><a href="https://abrok.eu/stockfish/latest/win/stockfish_x64_modern.zip" class="button">Download</a></td>
 			</tr>
 			<tr>
-				<td class="description">Other CPUs</td>
+				<td class="description last">Other CPUs</td>
 			</tr>
 		</tbody>
 	</table>
