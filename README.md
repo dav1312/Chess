@@ -11,5 +11,5 @@
 <p align="center">https://dav1312.github.io/Chess/StockfishDevBuilds</p>
 <p align="center">Download the latest Stockfish development builds for Windows from <a href="https://abrok.eu/stockfish/">abrok.eu</a></p>
 <p align="center">
-	<img width="650" src="https://user-images.githubusercontent.com/63931154/132331201-dc9185e9-9e96-4a8f-8954-0fd0b81c82c9.png">
+	<img width="650" src="https://user-images.githubusercontent.com/63931154/132945565-52520ff0-4e4c-4211-baf0-58dc34df07ca.png">
 </p>
