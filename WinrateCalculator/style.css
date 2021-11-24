@@ -1,0 +1,80 @@
+:root {
+	--bg1: #43658B;
+	--bg2: #4E89AE;
+	--bttnbg: #ED6663;
+	--bttnbghv: #DE5F5D;
+	--bttnbgact: #D15A58;
+	--bttncolor: #FFF;
+	--inputbg: #FFF;
+	--inputcolor: #1A1A1A
+}
+body {
+	background-color: var(--bg1)
+}
+table {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	width: auto
+}
+tbody {
+	padding: 8px;
+	background-color: var(--bg2);
+	border-radius: 8px
+}
+* {
+	font-family: Montserrat, sans-serif;
+	color: #FFF
+}
+h1 {
+	font-size: 30px;
+	margin: 0
+}
+td {
+	font-size: 18px
+}
+form {
+	margin-bottom: 0
+}
+input {
+	border-radius: 3px;
+	color: white;
+	border: 0;
+	outline: 0;
+	height: 37.5px;
+	font-size: 18px
+}
+input:not(.button) {
+	background-color: var(--inputbg);
+	color: var(--inputcolor);
+	padding-left: 9px;
+	width: 80px
+}
+.button {
+	background-color: var(--bttnbg);
+	color: var(--bttncolor);
+	transition: .15s;
+	width: 100%;
+	text-align: center
+}
+.button:hover {
+	background: var(--bttnbghv);
+	transition: .15s
+}
+.button:active {
+	background: var(--bttnbgact);
+	transition: .15s
+}
+@media only screen and (max-width: 760px) {
+	.inputs > td,
+	.elodiff input {
+		display: block
+	}
+	.elodiff input {
+		margin: auto auto 4px auto
+	}
+	.elodiff input:last-child {
+		margin: auto
+	}
+}

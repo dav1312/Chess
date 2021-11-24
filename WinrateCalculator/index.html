@@ -1,0 +1,74 @@
+<html>
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Winrate Calculator</title>
+	<link rel="stylesheet" href="style.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+	<script src="script.js"></script>
+<body>
+	<div align="center">
+		<table>
+			<tbody style="box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)">
+				<tr class="title">
+					<td colspan="3">
+						<h1 align="center">Winrate Calculator</h1>
+					</td>
+				</tr>
+				<tr class="inputs">
+					<td>
+						<form name="inputs" action="">
+							<table>
+								<tbody>
+									<tr>
+										<td>Eval</td>
+										<td>Move</td>
+									</tr>
+									<tr>
+										<td>
+											<input name="eval" value="0" size="5">
+										</td>
+										<td>
+											<input name="move" value="0" size="5">
+										</td>
+									</tr>
+									<td colspan="2">
+										<input type="button" class="button" value="Calculate" size="1" onclick="calculateWinRate()"></input>
+									</td>
+								</tbody>
+							</table>
+						</form>
+					</td>
+				</tr>
+				<tr class="elodiff">
+					<td colspan="3">
+						<form name="result" action="" style="margin-bottom:0">
+							<table>
+								<tbody>
+									<tr>
+										<td>Win</td>
+										<td>Draw</td>
+										<td>Loss</td>
+									</tr>
+									<tr>
+										<td>
+											<input name="win" value="50" style="width:80px">
+										</td>
+										<td>
+											<input name="draw" value="50" style="width:80px">
+										</td>
+										<td>
+											<input name="loss" value="50" style="width:80px">
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+<html>
