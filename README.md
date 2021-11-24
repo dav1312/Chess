@@ -4,7 +4,7 @@
 </p>
 <p align="center">A simple Elo calculator based on <a href="https://www.3dkingdoms.com/chess/elo.htm">3dkingdoms's Elo Calculator</a></p>
 <p align="center">
-	<img width="650" src="https://user-images.githubusercontent.com/63931154/133433178-dca5370f-c7ff-4142-b4ef-c59f47609a2f.png">
+	<img width="650" src="./EloCalculator/img.png">
 </p>
 
 ---
@@ -15,5 +15,16 @@
 </p>
 <p align="center">Download the latest Stockfish development builds for Windows from <a href="https://abrok.eu/stockfish/">abrok.eu</a></p>
 <p align="center">
-	<img width="650" src="https://user-images.githubusercontent.com/63931154/133433191-d836c23f-9c2a-4e4f-90d0-fcf05d8e02aa.png">
+	<img width="650" src="./StockfishDevBuilds/img.png">
+</p>
+
+---
+
+<h1 align="center">Winrate Calculator</h1>
+<p align="center">
+	<a href="https://dav1312.github.io/Chess/WinrateCalculator">https://dav1312.github.io/Chess/WinrateCalculator</a>
+</p>
+<p align="center">Calculate the win/draw/loss percentages using Stockfish's eval and move number</p>
+<p align="center">
+	<img width="650" src="./WinrateCalculator/img.png">
 </p>

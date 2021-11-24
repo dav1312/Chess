@@ -1,9 +1,9 @@
 :root {
-	--bg1: hsl(340deg 100% 35%);
-	--bg2: hsl(351deg 59% 53%);
-	--bttnbg: hsl(351deg 59% 40%);
-	--bttnbghv: hsl(351deg 59% 37%);
-	--bttnbgact: hsl(351deg 59% 30%);
+	--bg1: #43658B;
+	--bg2: #4E89AE;
+	--bttnbg: #ED6663;
+	--bttnbghv: #DE5F5D;
+	--bttnbgact: #D15A58;
 	--bttncolor: #FFF;
 	--inputbg: #FFF;
 	--inputcolor: #1A1A1A
@@ -24,7 +24,7 @@ tbody {
 	border-radius: 8px
 }
 * {
-	font-family: Montserrat, sans-serif;
+	font-family: Montserrat;
 	color: #FFF
 }
 h1 {
