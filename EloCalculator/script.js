@@ -1,43 +1,57 @@
-function CalculateElo() {
-	var wins = document.score.wins.value * 1;
-	var draws = document.score.draws.value * 1;
-	var losses = document.score.losses.value * 1;
-	var score = wins + draws / 2;
-	var total = wins + draws + losses;
-	var percentage = score / total;
-	var EloDifference = (-400 * Math.log(1 / percentage - 1)) / Math.LN10;
-	var Sign = "";
-	if (EloDifference > 0) {
-		Sign = "+";
-	}
-	document.points.points.value = score;
-	document.points.totalgames.value = total;
-	document.percent.winning.value = Math.round((percentage + Number.EPSILON) * 100000) / 1000;
-	document.Elo.difference.value = Sign + Math.round((EloDifference + Number.EPSILON) * 1000) / 1000;
+let form = document.forms.form;
+
+function calcEloFromWDL() {
+	let wins = form.wins.value * 1;
+	let draws = form.draws.value * 1;
+	let losses = form.losses.value * 1;
+	let score = wins + draws / 2;
+	let total = wins + draws + losses;
+	let percentage = score / total;
+	let eloDifference = calcEloDifference(percentage);
+	let sign = setSign(eloDifference);
+
+	form.points.value = score;
+	form.totalgames.value = total;
+	form.winningPerc.value = roundThreeDecimals(percentage, 100);
+	form.difference.value = sign + roundThreeDecimals(eloDifference, 1);
 }
-function CalculateEloFromScore() {
-	var score = document.points.points.value;
-	var total = document.points.totalgames.value;
-	var percentage = score / total;
-	var EloDifference = (-400 * Math.log(1 / percentage - 1)) / Math.LN10;
-	var Sign = "";
-	if (EloDifference > 0) {
-		Sign = "+";
-	}
-	document.percent.winning.value = Math.round((percentage + Number.EPSILON) * 100000) / 1000;
-	document.Elo.difference.value = Sign + Math.round((EloDifference + Number.EPSILON) * 1000) / 1000;
+
+function calcEloFromScore() {
+	let score = form.points.value;
+	let total = form.totalgames.value;
+	let percentage = score / total;
+	let eloDifference = calcEloDifference(percentage);
+	let sign = setSign(eloDifference);
+
+	form.winningPerc.value = roundThreeDecimals(percentage, 100);
+	form.difference.value = sign + roundThreeDecimals(eloDifference, 1);
 }
-function CalculateEloFromPercent() {
-	var percentage = document.percent.winning.value / 100;
-	var EloDifference = (-400 * Math.log(1 / percentage - 1)) / Math.LN10;
-	var Sign = "";
-	if (EloDifference > 0) {
-		Sign = "+";
-	}
-	document.Elo.difference.value = Sign + Math.round((EloDifference + Number.EPSILON) * 1000) / 1000;
+
+function calcEloFromPercent() {
+	let percentage = form.winningPerc.value / 100;
+	let eloDifference = calcEloDifference(percentage);
+	let sign = setSign(eloDifference);
+
+	form.difference.value = sign + roundThreeDecimals(eloDifference, 1);
 }
-function CalculatePercentFromElo() {
-	var EloDifference = document.Elo.difference.value * 1;
-	var WinningPct = (1 / (Math.exp(-(EloDifference * Math.LN10) / 400) + 1)) * 100;
-	document.percent.winning.value = Math.round((WinningPct + Number.EPSILON) * 1000) / 1000;
+
+function calcPercentFromElo() {
+	let eloDifference = form.difference.value * 1;
+	let winningPct = (1 / (Math.exp(-(eloDifference * Math.LN10) / 400) + 1)) * 100;
+
+	form.winningPerc.value = roundThreeDecimals(winningPct, 1);
+}
+
+function roundThreeDecimals(number, multiplier) {
+	return Math.round((number + Number.EPSILON) * 1000 * multiplier) / 1000;
+}
+
+function calcEloDifference(percentage) {
+	return (-400 * Math.log(1 / percentage - 1)) / Math.LN10;
+}
+
+function setSign(eloDifference) {
+	if (eloDifference > 0)
+		return "+";
+	return "";
 }

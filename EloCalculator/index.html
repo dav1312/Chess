@@ -1,25 +1,28 @@
 <html>
+
 <head>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Elo Calculator</title>
 	<link rel="stylesheet" href="style.css">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;400;500;600;700;900&display=swap" rel="stylesheet">
-	<script src="script.js"></script>
+	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;400;500;600;700;900&display=swap"
+		rel="stylesheet">
 </head>
+
 <body>
 	<div align="center">
-		<table>
-			<tbody style="box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)">
-				<tr class="title">
-					<td colspan="3">
-						<h1 align="center">Elo Calculator</h1>
-					</td>
-				</tr>
-				<tr class="inputs">
-					<td>
-						<form name="score" action="">
+		<form name="form" action="">
+			<table>
+				<tbody
+					style="box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)">
+					<tr class="title">
+						<td colspan="3">
+							<h1 align="center">Elo Calculator</h1>
+						</td>
+					</tr>
+					<tr class="inputs">
+						<td>
 							<table>
 								<tbody>
 									<tr>
@@ -39,14 +42,13 @@
 										</td>
 									</tr>
 									<td colspan="3">
-										<input type="button" class="button" value="Calculate" size="1" onclick="CalculateElo()"></input>
+										<input type="button" class="button" value="Calculate" size="1"
+											onclick="calcEloFromWDL()"></input>
 									</td>
 								</tbody>
 							</table>
-						</form>
-					</td>
-					<td>
-						<form name="points" action="">
+						</td>
+						<td>
 							<table>
 								<tbody>
 									<tr>
@@ -64,14 +66,13 @@
 										</td>
 									</tr>
 									<td colspan="3">
-										<input type="button" class="button" value="Calculate" size="1" onclick="CalculateEloFromScore()"></input>
+										<input type="button" class="button" value="Calculate" size="1"
+											onclick="calcEloFromScore()"></input>
 									</td>
 								</tbody>
 							</table>
-						</form>
-					</td>
-					<td>
-						<form name="percent" action="">
+						</td>
+						<td>
 							<table>
 								<tbody>
 									<tr>
@@ -79,38 +80,39 @@
 									</tr>
 									<tr>
 										<td>
-											<input name="winning" value="50" size="5" style="width: 100%">
+											<input name="winningPerc" value="50" size="5" style="width: 100%">
 										</td>
 									</tr>
 									<tr>
 										<td>
-											<input type="button" class="button" value="Calculate" size="1" onclick="CalculateEloFromPercent()"></input>
+											<input type="button" class="button" value="Calculate" size="1"
+												onclick="calcEloFromPercent()"></input>
 										</td>
 									</tr>
 								</tbody>
 							</table>
-						</form>
-					</td>
-				</tr>
-				<tr class="elodiff">
-					<td colspan="3">
-						<form name="Elo" action="" style="margin-bottom:0">
-							<table>
+						</td>
+					</tr>
+					<tr class="elodiff">
+						<td colspan="3">
+							<table style="margin-bottom:0">
 								<tbody>
 									<tr>
 										<td>
 											Elo Difference:
 											<input name="difference" value="+0" style="width:120px">
-											<input type="button" class="button" value="Calculate" size="1" onclick="CalculatePercentFromElo()" style="width: 120px">
+											<input type="button" class="button" value="Calculate" size="1"
+												onclick="calcPercentFromElo()" style="width: 120px">
 										</td>
 									</tr>
 								</tbody>
 							</table>
-						</form>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
 	</div>
+	<script src="script.js"></script>
 </body>
 <html>
