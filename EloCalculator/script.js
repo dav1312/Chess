@@ -51,7 +51,5 @@ function calcEloDifference(percentage) {
 }
 
 function setSign(eloDifference) {
-	if (eloDifference > 0)
-		return "+";
-	return "";
+	return (eloDifference > 0) ? "+" : "";
 }
