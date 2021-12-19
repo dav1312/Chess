@@ -11,15 +11,16 @@ function win_rate_model(eval, ply) {
 }
 
 function calculateWinRate() {
-	var eval = document.inputs.eval.value * 1;
-	var ply = document.inputs.move.value * 2;
+	let form = document.forms.form;
+	var eval = form.eval.value * 1;
+	var ply = form.move.value * 2;
 	let wdl_w = win_rate_model(eval, ply);
 	let wdl_l = win_rate_model(-eval, ply);
 	let wdl_d = 1000 - wdl_w - wdl_l;
 	let wdl_w_perc = (wdl_w / 10)+"%";
 	let wdl_l_perc = (wdl_l / 10)+"%";
 	let wdl_d_perc = (wdl_d / 10)+"%";
-	document.result.win.value = wdl_w_perc;
-	document.result.loss.value = wdl_l_perc;
-	document.result.draw.value = wdl_d_perc;
+	form.win.value = wdl_w_perc;
+	form.loss.value = wdl_l_perc;
+	form.draw.value = wdl_d_perc;
 }
