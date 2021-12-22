@@ -1,76 +1,74 @@
 <html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Winrate Calculator</title>
+		<link rel="stylesheet" href="style.css" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;400;500;600;700;900&display=swap" />
+		<script src="script.js"></script>
+	</head>
 
-<head>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Winrate Calculator</title>
-	<link rel="stylesheet" href="style.css">
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;400;500;600;700;900&display=swap">
-	<script src="script.js"></script>
-</head>
-
-<body>
-	<div align="center">
-		<form name="form" action="">
-			<table>
-				<tbody style="box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)">
-					<tr class="title">
-						<td colspan="3">
-							<h1 align="center">Winrate Calculator</h1>
-						</td>
-					</tr>
-					<tr class="inputs">
-						<td>
-							<table>
-								<tbody>
-									<tr>
-										<td>Eval</td>
-										<td>Move</td>
-									</tr>
-									<tr>
-										<td>
-											<input name="eval" value="0" size="5">
+	<body>
+		<div align="center">
+			<form name="form" action="">
+				<table>
+					<tbody style="box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)">
+						<tr class="title">
+							<td colspan="3">
+								<h1 align="center">Winrate Calculator</h1>
+							</td>
+						</tr>
+						<tr class="inputs">
+							<td>
+								<table>
+									<tbody>
+										<tr>
+											<td>Eval</td>
+											<td>Move</td>
+										</tr>
+										<tr>
+											<td>
+												<input name="eval" value="0" size="5" />
+											</td>
+											<td>
+												<input name="move" value="0" size="5" />
+											</td>
+										</tr>
+										<td colspan="2">
+											<input type="button" class="button" value="Calculate" size="1" onclick="calculateWinRate()" />
 										</td>
-										<td>
-											<input name="move" value="0" size="5">
-										</td>
-									</tr>
-									<td colspan="2">
-										<input type="button" class="button" value="Calculate" size="1" onclick="calculateWinRate()"></input>
-									</td>
-								</tbody>
-							</table>
-						</td>
-					</tr>
-					<tr class="elodiff">
-						<td colspan="3">
-							<table>
-								<tbody>
-									<tr>
-										<td>Win</td>
-										<td>Draw</td>
-										<td>Loss</td>
-									</tr>
-									<tr>
-										<td>
-											<input name="win" value="4.2%" style="width:80px">
-										</td>
-										<td>
-											<input name="draw" value="91.6%" style="width:80px">
-										</td>
-										<td>
-											<input name="loss" value="4.2%" style="width:80px">
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</form>
-	</div>
-</body>
-
+									</tbody>
+								</table>
+							</td>
+						</tr>
+						<tr class="elodiff">
+							<td colspan="3">
+								<table>
+									<tbody>
+										<tr>
+											<td>Win</td>
+											<td>Draw</td>
+											<td>Loss</td>
+										</tr>
+										<tr>
+											<td>
+												<input name="win" value="4.2%" style="width: 80px" />
+											</td>
+											<td>
+												<input name="draw" value="91.6%" style="width: 80px" />
+											</td>
+											<td>
+												<input name="loss" value="4.2%" style="width: 80px" />
+											</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</form>
+		</div>
+	</body>
 </html>
