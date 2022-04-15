@@ -1,3 +1,5 @@
+window.onload = calculateWinRate;
+
 function win_rate_model(eval, ply) {
 	const PawnValueEg = 208;
 	const v = eval * PawnValueEg;
