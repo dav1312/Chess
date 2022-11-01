@@ -1,14 +1,14 @@
 window.onload = calculateWinRate;
 
 function win_rate_model(eval, ply) {
-	const PawnValueEg = 208;
-	const v = eval * PawnValueEg;
+	const Internal2Pawn = 348;
+	const v = eval * Internal2Pawn;
 	const m = Math.min(240, ply) / 64;
-	const as = [0.50379905, -4.12755858, 18.95487051, 152.00733652];
-	const bs = [-1.71790378, 10.71543602, -17.05515898, 41.15680404];
+	const as = [1.04790516, -8.58534089, 39.42615625, 316.17524816];
+	const bs = [-3.57324784, 22.28816201, -35.47480551, 85.60617701];
 	const a = (((as[0] * m + as[1]) * m + as[2]) * m) + as[3];
 	const b = (((bs[0] * m + bs[1]) * m + bs[2]) * m) + bs[3];
-	const x = Math.min(Math.max(((100 * v) / PawnValueEg), -2000), 2000);
+	const x = Math.min(Math.max((v), -4000), 4000);
 	return Math.round(0.5 + 1000 / (1 + Math.exp((a - x) / b)));
 }
 
