@@ -58,7 +58,7 @@ function win_rate_model(eval, ply, model) {
 function calculateWinRate() {
 	const form = document.forms.form;
 	const eval = form.eval.value * 1;
-	let ply = form.move.value
+	let ply = form.move.value;
 	if (ply < 0) {
 		ply *= -1;
 		form.move.value = ply;
