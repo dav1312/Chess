@@ -26,6 +26,7 @@
 										<tr>
 											<td>Eval</td>
 											<td>Move</td>
+											<td>Model</td>
 										</tr>
 										<tr>
 											<td>
@@ -34,8 +35,17 @@
 											<td>
 												<input name="move" value="0" size="5" />
 											</td>
+											<td>
+												<select name="model">
+													<option value="2022-11-05" selected>2022-11-05</option>
+													<option value="2022-08-06">2022-08-06</option>
+													<option value="2022-04-16">2022-04-16</option>
+													<option value="2021-06-28">2021-06-28</option>
+													<option value="2020-07-01">2020-07-01</option>
+												</select>
+											</td>
 										</tr>
-										<td colspan="2">
+										<td colspan="3">
 											<input type="button" class="button" value="Calculate" size="1" onclick="calculateWinRate()" />
 										</td>
 									</tbody>

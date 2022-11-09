@@ -37,7 +37,7 @@ td {
 form {
 	margin-bottom: 0
 }
-input {
+input, select {
 	border-radius: 3px;
 	color: white;
 	border: 0;
@@ -45,11 +45,16 @@ input {
 	height: 37.5px;
 	font-size: 18px
 }
-input:not(.button) {
+input:not(.button), option {
 	background-color: var(--inputbg);
 	color: var(--inputcolor);
 	padding-left: 9px;
 	width: 80px
+}
+select {
+	background-color: var(--inputbg);
+	color: var(--inputcolor);
+	padding-left: 9px;
 }
 .button {
 	background-color: var(--bttnbg);
