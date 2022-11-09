@@ -1,84 +1,113 @@
 <html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Winrate Calculator</title>
-		<link rel="stylesheet" href="style.css" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;400;500;600;700;900&display=swap" />
-		<script src="script.js"></script>
-	</head>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Winrate Calculator</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;400;500;600;700;900&display=swap"
+    />
+    <script src="script.js"></script>
+  </head>
 
-	<body>
-		<div align="center">
-			<form name="form" action="">
-				<table>
-					<tbody style="box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)">
-						<tr class="title">
-							<td colspan="3">
-								<h1 align="center">Winrate Calculator</h1>
-							</td>
-						</tr>
-						<tr class="inputs">
-							<td>
-								<table>
-									<tbody>
-										<tr>
-											<td>Eval</td>
-											<td>Move</td>
-											<td>Model</td>
-										</tr>
-										<tr>
-											<td>
-												<input type="number" name="eval" value="0" size="5" />
-											</td>
-											<td>
-												<input type="number" name="move" value="0" size="5" />
-											</td>
-											<td>
-												<select name="model">
-													<option value="2022-11-05" selected>2022-11-05</option>
-													<option value="2022-08-06">2022-08-06</option>
-													<option value="2022-04-16">2022-04-16</option>
-													<option value="2021-06-28">2021-06-28</option>
-													<option value="2020-07-01">2020-07-01</option>
-												</select>
-											</td>
-										</tr>
-										<td colspan="3">
-											<input type="button" class="button" value="Calculate" size="1" onclick="calculateWinRate()" />
-										</td>
-									</tbody>
-								</table>
-							</td>
-						</tr>
-						<tr class="elodiff">
-							<td colspan="3">
-								<table>
-									<tbody>
-										<tr>
-											<td>Win</td>
-											<td>Draw</td>
-											<td>Loss</td>
-										</tr>
-										<tr>
-											<td>
-												<input name="win" style="width: 80px" />
-											</td>
-											<td>
-												<input name="draw" style="width: 80px" />
-											</td>
-											<td>
-												<input name="loss" style="width: 80px" />
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</form>
-		</div>
-	</body>
+  <body>
+    <div align="center">
+      <form name="form" action="">
+        <table>
+          <tbody
+            style="
+              box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%),
+                0 8px 12px rgb(0 0 0 / 15%);
+            "
+          >
+            <tr class="title">
+              <td colspan="3">
+                <h1 align="center">Winrate Calculator</h1>
+              </td>
+            </tr>
+            <tr class="inputs">
+              <td>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>Eval</td>
+                      <td>Move</td>
+                      <td>Model</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <input
+                          type="number"
+                          name="eval"
+                          value="0"
+                          size="5"
+                          onkeyup="validateEval(this.value)"
+                        />
+                      </td>
+                      <td>
+                        <input
+                          type="number"
+                          name="move"
+                          value="0"
+                          size="5"
+                          onkeyup="validateMove(this.value)"
+                        />
+                      </td>
+                      <td>
+                        <select name="model">
+                          <option value="2022-11-05" selected>
+                            2022-11-05
+                          </option>
+                          <option value="2022-08-06">2022-08-06</option>
+                          <option value="2022-04-16">2022-04-16</option>
+                          <option value="2021-06-28">2021-06-28</option>
+                          <option value="2020-07-01">2020-07-01</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <td colspan="3">
+                      <input
+                        id="calculate"
+                        type="button"
+                        class="button"
+                        value="Calculate"
+                        size="1"
+                        onclick="calculateWinRate()"
+                      />
+                    </td>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            <tr class="elodiff">
+              <td colspan="3">
+                <table>
+                  <tbody>
+                    <tr>
+                      <td>Win</td>
+                      <td>Draw</td>
+                      <td>Loss</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <input name="win" style="width: 80px" readonly />
+                      </td>
+                      <td>
+                        <input name="draw" style="width: 80px" readonly />
+                      </td>
+                      <td>
+                        <input name="loss" style="width: 80px" readonly />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </form>
+    </div>
+  </body>
 </html>
