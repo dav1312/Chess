@@ -45,16 +45,13 @@ input, select {
 	height: 37.5px;
 	font-size: 18px
 }
-input:not(.button), option {
+input:not(.button), select, option {
 	background-color: var(--inputbg);
 	color: var(--inputcolor);
 	padding-left: 9px;
-	width: 80px
 }
-select {
-	background-color: var(--inputbg);
-	color: var(--inputcolor);
-	padding-left: 9px;
+input:not(.button) {
+	width: 80px;
 }
 .button {
 	background-color: var(--bttnbg);
