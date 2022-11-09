@@ -28,7 +28,7 @@ function win_rate_model(eval, ply, model) {
 			pawnValue = 208;
 			v = eval * pawnValue;
 			as = [-1.17202460e-01, 5.94729104e-01, 1.12065546e+01, 1.22606222e+02];
-			bs = [-1.79066759, 11.30759193, -17.43677612,  36.47147479];
+			bs = [-1.79066759, 11.30759193, -17.43677612, 36.47147479];
 			x = Math.min(Math.max(((100 * v) / pawnValue), -2000), 2000);
 			break;
 
@@ -58,15 +58,17 @@ function win_rate_model(eval, ply, model) {
 function calculateWinRate() {
 	const form = document.forms.form;
 	const eval = form.eval.value * 1;
-	const ply = form.move.value * 2;
+	let ply = form.move.value
+	if (ply < 0) {
+		ply *= -1;
+		form.move.value = ply;
+	}
+	ply *= 2;
 	const model = form.model.value;
 	const wdl_w = win_rate_model(eval, ply, model);
 	const wdl_l = win_rate_model(-eval, ply, model);
 	const wdl_d = 1000 - wdl_w - wdl_l;
-	const wdl_w_perc = `${wdl_w / 10}%`;
-	const wdl_l_perc = `${wdl_l / 10}%`;
-	const wdl_d_perc = `${wdl_d / 10}%`;
-	form.win.value = wdl_w_perc;
-	form.loss.value = wdl_l_perc;
-	form.draw.value = wdl_d_perc;
+	form.win.value = `${wdl_w / 10}%`;
+	form.loss.value = `${wdl_l / 10}%`;
+	form.draw.value = `${wdl_d / 10}%`;
 }

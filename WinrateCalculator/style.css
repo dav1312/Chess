@@ -53,6 +53,14 @@ input:not(.button), select, option {
 input:not(.button) {
 	width: 80px;
 }
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
 .button {
 	background-color: var(--bttnbg);
 	color: var(--bttncolor);
