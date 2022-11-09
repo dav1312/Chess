@@ -52,7 +52,7 @@ function win_rate_model(eval, ply, model) {
 	const m = Math.min(240, ply) / 64;
 	const a = (((as[0] * m + as[1]) * m + as[2]) * m) + as[3];
 	const b = (((bs[0] * m + bs[1]) * m + bs[2]) * m) + bs[3];
-	return Math.round(0.5 + 1000 / (1 + Math.exp((a - x) / b)));
+	return Math.floor(0.5 + 1000 / (1 + Math.exp((a - x) / b)));
 }
 
 function calculateWinRate() {
