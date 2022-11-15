@@ -1,11 +1,5 @@
-window.onload = calculateWinRate;
-
-function win_rate_model(eval, ply, model) {
-	let pawnValue;
-	let v;
-	let x;
-	let as;
-	let bs;
+const win_rate_model = (eval, ply, model) => {
+	let pawnValue, v, x, as, bs;
 
 	switch (model) {
 		case "2022-11-05":
@@ -55,7 +49,7 @@ function win_rate_model(eval, ply, model) {
 	return Math.floor(0.5 + 1000 / (1 + Math.exp((a - x) / b)));
 }
 
-function calculateWinRate() {
+const calculateWinRate = () => {
 	const form = document.forms.form;
 	const eval = form.eval.value * 1;
 	let ply = form.move.value;
@@ -72,3 +66,10 @@ function calculateWinRate() {
 	form.loss.value = `${wdl_l / 10}%`;
 	form.draw.value = `${wdl_d / 10}%`;
 }
+
+const copyWDL = () => {
+	const WDLText = `${form.win.value} W ${form.draw.value} D ${form.loss.value} L`
+	navigator.clipboard.writeText(WDLText);
+}
+
+window.onload = calculateWinRate;
