@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphviz</title>
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    <script src="./js/script.js" defer></script>
+    <style>
+        .monospace {
+            font-family: var(--bs-font-monospace);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-3 mb-3">
+        <p class="display-5">Input</p>
+        <div class="form-check form-check-inline mb-3">
+            <input type="checkbox" class="form-check-input" id="curvedLinesOutput" checked>
+            <label class="form-check-label" for="curvedLinesOutput">Curved lines</label>
+        </div>
+        <div class="form-check form-check-inline mb-3">
+            <input type="checkbox" class="form-check-input" id="arrowHeadOutput" checked>
+            <label class="form-check-label" for="arrowHeadOutput">Arrow head</label>
+        </div>
+        <div class="form-check form-check-inline mb-3">
+            <input type="checkbox" class="form-check-input" id="fixPVOutput" checked>
+            <label class="form-check-label" for="fixPVOutput">Fix PV lines</label>
+        </div>
+        <div class="form-check form-check-inline mb-3">
+            <input type="checkbox" class="form-check-input" id="removeDuplicatesOutput" checked>
+            <label class="form-check-label" for="removeDuplicatesOutput">Remove duplicates</label>
+        </div>
+        <div class="form-check form-check-inline mb-3">
+            <input type="checkbox" class="form-check-input" id="convertEvalsOutput" checked>
+            <label class="form-check-label" for="convertEvalsOutput">Convert evals</label>
+        </div>
+        <div class="form-check form-check-inline mb-3">
+            <input type="checkbox" class="form-check-input" id="sortOutput">
+            <label class="form-check-label" for="sortOutput">Sort alphabetically</label>
+        </div>
+        <div class="form-check form-check-inline mb-3">
+            <input type="checkbox" class="form-check-input" id="removeLabelsOutput">
+            <label class="form-check-label" for="removeLabelsOutput">Remove labels</label>
+        </div>
+
+        <div class="input-group shadow mb-3">
+            <textarea class="form-control monospace" id="input" cols="30" rows="10" placeholder="Paste code here"></textarea>
+            <button class="btn btn-outline-secondary" type="button" id="generate">Generate</button>
+        </div>
+        <p class="display-5">Output</p>
+        <div class="input-group shadow mb-3">
+            <textarea class="form-control monospace" id="output" cols="30" rows="10" placeholder="Copy code from here" readonly></textarea>
+            <button class="btn btn-outline-secondary" type="button" id="copy">Copy</button>
+        </div>
+    </div>
+</body>
+
+</html>
