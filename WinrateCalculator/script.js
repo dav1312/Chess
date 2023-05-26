@@ -1,7 +1,24 @@
 const win_rate_model = (eval, ply, model) => {
+	console.log(`Using model: ${model}`);
 	let pawnValue, v, x, as, bs;
 
 	switch (model) {
+		case "2023-05-20":
+			pawnValue = 343;
+			v = eval * pawnValue;
+			as = [1.07390458, -6.94334517, 31.95090161, 317.75424048];
+			bs = [-2.82843814, 16.64518180, -19.74439200, 68.39499088];
+			x = Math.min(Math.max(v, -4000), 4000);
+			break;
+
+		case "2023-02-02":
+				pawnValue = 394;
+				v = eval * pawnValue;
+				as = [0.33677609, -4.30175627, 33.08810557, 365.60223431];
+				bs = [-2.50471102, 14.23235405, -14.33066859, 71.42705250];
+				x = Math.min(Math.max(v, -4000), 4000);
+				break;
+
 		case "2022-11-20":
 			pawnValue = 361;
 			v = eval * pawnValue;
