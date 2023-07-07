@@ -1,0 +1,36 @@
+.monospace {
+    font-family: var(--bs-font-monospace);
+}
+
+.code {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.text-decoration-hover:hover {
+    text-decoration: underline;
+}
+
+:root, [data-bs-theme=light] {
+    --bs-success-rgb: 11, 207, 0;
+}
+
+[data-bs-theme=dark] {
+    --bs-success-rgb: 38, 207, 129;
+}
+
+[data-bs-theme=dark] {
+    color-scheme: dark;
+    --bs-body-color: rgb(var(--bs-body-color-rgb));
+    --bs-body-color-rgb: 232, 234, 237;
+    --bs-body-bg: rgb(var(--bs-body-bg-rgb));
+    --bs-body-bg-rgb: 33, 37, 41;
+}
+
+[data-bs-theme=dark] .table {
+    --bs-table-striped-bg: var(--bs-table-active-bg);
+}
+
+.nav-link {
+    fill: var(--bs-nav-link-color)
+}
