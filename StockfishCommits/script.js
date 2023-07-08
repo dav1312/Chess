@@ -3,6 +3,7 @@ const apiUrl = `https://api.github.com/repos/${repo}/commits`;
 const commitUrl = `https://github.com/${repo}/commit/`;
 const perPage = 100;
 let currentPage = 1;
+
 function shouldHideText(expander) {
     return expander.scrollHeight > expander.clientHeight
 }
@@ -20,6 +21,19 @@ function calcEloDifference(percentage) {
 
 function setSign(v) {
     return v > 0 ? "+" : "";
+}
+
+function getPatchType(message) {
+    const gainerRegex = /LLR:.*?[<\[\{]0/;
+    const SimplRegex = /LLR:.*?[<\[\{]-/;
+    if (message.includes("functional change")) {
+        return "var(--bs-secondary)";
+    } else if (gainerRegex.test(message)) {
+        return "rgba(var(--bs-success-rgb), 1)";
+    } else if (SimplRegex.test(message)) {
+        return "var(--bs-blue)";
+    }
+    return "initial";
 }
 
 function fetchCommits(page) {
@@ -41,17 +55,16 @@ function fetchCommits(page) {
                     authorString = `<strong>Author: </strong><a href="${commit.author.html_url}" target="_blank">${commit.author.login}</a> | `;
                 }
                 commitRow.innerHTML = `
-<td>
+<td class="p-3">
     <p class="mb-0">${authorString + committerString}</p>
     <p class="mb-0"><strong>Commit: </strong><a href="${commitUrl + commit.sha}" target="_blank">${commit.sha}</a></p>
     <p class="mb-0"><strong>Date: </strong>${commit.commit.author.date.replace("T", " ").replace("Z", "")}</p>
-    <p class="code small monospace mb-0" id="message-${commit.sha}"></p>
+    <p class="code small monospace mb-0">${formatCommitMessage(commit.commit.message)}</p>
 </td>
                 `;
-
+                const patchType = getPatchType(commit.commit.message);
+                commitRow.style.borderLeft = `5px solid ${patchType}`;
                 commitsBody.appendChild(commitRow);
-                const message = document.getElementById(`message-${commit.sha}`);
-                message.innerHTML = formatCommitMessage(commit.commit.message);
 
                 document.getElementById('curr').textContent = currentPage;
             });
@@ -74,14 +87,14 @@ function formatCommitMessage(message) {
         const w = parseInt(ww) + parseInt(wd);
         const elo = calcEloFromWDL(parseInt(w), parseInt(d), parseInt(l));
         const sign = setSign(elo);
-        return `${match} (Elo: <span class="text-${sign === "+" ? "success" : "danger"}">${sign + elo.toFixed(1)}</span>)`;
+        return `${match} (Elo: <span class="text-${sign === "+" ? "success" : "danger"}">${sign + elo.toFixed(2)}</span>)`;
     });
 
     const eloRegex = /Total: \d+ W: (\d+) L: (\d+) D: (\d+)/g;
     message = message.replace(eloRegex, (match, w, l, d) => {
         const elo = calcEloFromWDL(parseInt(w), parseInt(d), parseInt(l));
         const sign = setSign(elo);
-        return `${match} (Elo: <span class="text-${sign === "+" ? "success" : "danger"}">${sign + elo.toFixed(1)}</span>)`;
+        return `${match} (Elo: <span class="text-${sign === "+" ? "success" : "danger"}">${sign + elo.toFixed(2)}</span>)`;
     });
 
     return message;
