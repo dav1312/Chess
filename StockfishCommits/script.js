@@ -58,7 +58,7 @@ function fetchCommits(page) {
 <td class="p-3">
     <p class="mb-0">${authorString + committerString}</p>
     <p class="mb-0"><strong>Commit: </strong><a href="${commitUrl + commit.sha}" target="_blank">${commit.sha}</a></p>
-    <p class="mb-0"><strong>Date: </strong>${commit.commit.author.date.replace("T", " ").replace("Z", "")}</p>
+    <p class="mb-0"><strong>Date: </strong>${commit.commit.committer.date.replace(/T|Z/g, " ")}</p>
     <p class="code small monospace mb-0">${formatCommitMessage(commit.commit.message)}</p>
 </td>
                 `;
