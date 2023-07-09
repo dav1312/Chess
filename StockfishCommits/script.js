@@ -65,9 +65,14 @@ function fetchCommits(page) {
                 const patchType = getPatchType(commit.commit.message);
                 commitRow.style.borderLeft = `5px solid ${patchType}`;
                 commitsBody.appendChild(commitRow);
-
-                document.getElementById('curr').textContent = currentPage;
             });
+            document.getElementById('curr').textContent = currentPage;
+            const prevBtn = document.getElementById('prev');
+            if (currentPage === 1) {
+                prevBtn.classList.add("disabled");
+            } else {
+                prevBtn.classList.remove("disabled");
+            }
         })
         .catch(error => {
             console.error('Error fetching commits:', error);
@@ -101,34 +106,6 @@ function formatCommitMessage(message) {
 }
 
 function updatePagination() {
-    const pagination = document.getElementById('pagination');
-    pagination.innerHTML = '';
-
-    const previousPage = document.createElement('li');
-    previousPage.classList.add("page-item");
-    previousPage.innerHTML = `<a id="prev" class="page-link" href="#">Previous</a>`;
-    previousPage.addEventListener('click', () => {
-        event.preventDefault();
-        if (currentPage > 1) {
-            currentPage--;
-            fetchCommits(currentPage);
-        }
-    });
-
-    const nextPage = document.createElement('li');
-    nextPage.classList.add("page-item");
-    nextPage.innerHTML = `<a id="next" class="page-link" href="#">Next</a>`;
-    nextPage.addEventListener('click', () => {
-        event.preventDefault();
-        currentPage++;
-        fetchCommits(currentPage);
-    });
-
-    pagination.appendChild(previousPage);
-    pagination.appendChild(nextPage);
-}
-
-function updatePagination1() {
     document.getElementById('prev').addEventListener('click', () => {
         event.preventDefault();
         if (currentPage > 1) {
@@ -145,4 +122,4 @@ function updatePagination1() {
 }
 
 fetchCommits(currentPage);
-updatePagination1();
+updatePagination();
