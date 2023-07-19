@@ -84,8 +84,11 @@ function fetchCommits(page) {
                 const [firstLine, ...restOfTextLines] = formatCommitMessage(commit.commit.message).split('\n');
                 const restOfText = restOfTextLines.join('\n');
                 commitRow.innerHTML = `<td class="p-3">
-                    <p class="mb-0">${authorString + committerString}<span class="mb-0" title="${commit.commit.committer.date.replace(/T|Z/g, " ")}"> | ${formatRelativeTime(commit.commit.committer.date)}</span></p>
-                    <p class="code small monospace mb-0 fs-5"><a href="${commitUrl + commit.sha}" target="_blank"><strong>${firstLine}</strong></a></p>
+                    <div class="d-flex mb-0">
+                        <div>${authorString + committerString}<span class="mb-0" title="${commit.commit.committer.date.replace(/T|Z/g, " ")}"> | ${formatRelativeTime(commit.commit.committer.date)}</span></div>
+                        <div class="ms-auto"><a href="${commitUrl + commit.sha}" target="_blank" title="${commit.sha}" class="monospace">${commit.sha.substring(0,8)}</a></div>
+                    </div>
+                    <p class="code small monospace mb-0 fs-5"><a href="${commitUrl + commit.sha}" target="_blank" title="${commit.sha}"><strong>${firstLine}</strong></a></p>
                     <p class="code small monospace mb-0">${restOfText}</p>
                 </td>`;
                 const patchType = getPatchType(commit.commit.message);
