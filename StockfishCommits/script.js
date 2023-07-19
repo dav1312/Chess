@@ -36,6 +36,33 @@ function getPatchType(message) {
     return "initial";
 }
 
+function getRelativeTime(value, unit) {
+    const rtf = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+    return rtf.format(value, unit);
+}
+
+function formatRelativeTime(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const timeDiff = date.getTime() - now.getTime();
+    if (timeDiff >= -60000) {
+        return getRelativeTime(Math.ceil(timeDiff / 1000), "second");
+    }
+    if (timeDiff >= -3600000) {
+        return getRelativeTime(Math.ceil(timeDiff / 60000), "minute");
+    }
+    if (timeDiff >= -86400000) {
+        return getRelativeTime(Math.ceil(timeDiff / 3600000), "hour");
+    }
+    if (timeDiff >= -2592000000) {
+        return getRelativeTime(Math.ceil(timeDiff / 86400000), "day");
+    }
+    if (timeDiff >= -31104000000) {
+        return getRelativeTime(Math.ceil(timeDiff / 2592000000), "month");
+    }
+    return dateString.replace(/T|Z/g, " ");
+}
+
 function fetchCommits(page) {
     const url = `${apiUrl}?per_page=${perPage}&page=${page}`;
 
@@ -54,14 +81,13 @@ function fetchCommits(page) {
                 } else if (commit.author.id !== commit.committer.id) {
                     authorString = `<strong>Author: </strong><a href="${commit.author.html_url}" target="_blank">${commit.author.login}</a> | `;
                 }
-                commitRow.innerHTML = `
-<td class="p-3">
-    <p class="mb-0">${authorString + committerString}</p>
-    <p class="mb-0"><strong>Commit: </strong><a href="${commitUrl + commit.sha}" target="_blank">${commit.sha}</a></p>
-    <p class="mb-0"><strong>Date: </strong>${commit.commit.committer.date.replace(/T|Z/g, " ")}</p>
-    <p class="code small monospace mb-0">${formatCommitMessage(commit.commit.message)}</p>
-</td>
-                `;
+                const [firstLine, ...restOfTextLines] = formatCommitMessage(commit.commit.message).split('\n');
+                const restOfText = restOfTextLines.join('\n');
+                commitRow.innerHTML = `<td class="p-3">
+                    <p class="mb-0">${authorString + committerString}<span class="mb-0" title="${commit.commit.committer.date.replace(/T|Z/g, " ")}"> | ${formatRelativeTime(commit.commit.committer.date)}</span></p>
+                    <p class="code small monospace mb-0 fs-5"><a href="${commitUrl + commit.sha}" target="_blank"><strong>${firstLine}</strong></a></p>
+                    <p class="code small monospace mb-0">${restOfText}</p>
+                </td>`;
                 const patchType = getPatchType(commit.commit.message);
                 commitRow.style.borderLeft = `5px solid ${patchType}`;
                 commitsBody.appendChild(commitRow);
