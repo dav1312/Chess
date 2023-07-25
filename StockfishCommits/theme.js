@@ -34,13 +34,17 @@
 
     setTheme(getPreferredTheme());
 
-    window
-        .matchMedia("(prefers-color-scheme: dark)")
-        .addEventListener("change", () => {
-            if (storedTheme !== "light" || storedTheme !== "dark") {
-                setTheme(getPreferredTheme());
-            }
-        });
+    try {
+        window
+            .matchMedia("(prefers-color-scheme: dark)")
+            .addEventListener("change", () => {
+                if (storedTheme !== "light" || storedTheme !== "dark") {
+                    setTheme(getPreferredTheme());
+                }
+            });
+    } catch (e) {
+        console.error(e);
+    }
 
     window.addEventListener("load", () => {
         setTheme(getPreferredTheme());

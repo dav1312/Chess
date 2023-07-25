@@ -42,6 +42,9 @@ function getRelativeTime(value, unit) {
 }
 
 function formatRelativeTime(dateString) {
+    if (!window.Intl || typeof window.Intl.RelativeTimeFormat !== "function") {
+        return dateString.replace(/T|Z/g, " ");
+    }
     const date = new Date(dateString);
     const now = new Date();
     const timeDiff = date.getTime() - now.getTime();
