@@ -122,7 +122,7 @@ function formatCommitMessage(message) {
     message = message.replace(ptnmlRegex, (match, ll, ld, d, wd, ww) => {
         const l = parseInt(ll) + parseInt(ld);
         const w = parseInt(ww) + parseInt(wd);
-        const elo = calcEloFromWDL(parseInt(w), parseInt(d), parseInt(l));
+        const elo = calcEloFromWDL(parseInt(w), parseInt(d), parseInt(l)) / 2;
         const sign = setSign(elo);
         return `${match} (Elo: <span class="text-${sign === "+" ? "success" : "danger"}">${sign + elo.toFixed(2)}</span>)`;
     });
