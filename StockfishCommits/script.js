@@ -153,6 +153,68 @@ function updatePagination() {
     });
 }
 
+async function getLatestRelease() {
+    const userOS = getUserOS();
+    const dropdownMenu = document.querySelector("#mainDownloadBtn .dropdown-menu");
+    const notUserOSDownloads = document.getElementById("notUserOSDownloads");
+
+    if (userOS === "Unknown") {
+        console.error("Unknown userAgent:", userOS);
+        document.getElementById("mainDownloadBtn").classList.add("d-none");
+    } else {
+        document.getElementById("userOS").textContent = "for " + userOS;
+        document.getElementById("mainDownloadBtn").classList.remove("d-none");
+    }
+    // Clear existing dropdown items and not userOS downloads
+    dropdownMenu.innerHTML = "";
+    notUserOSDownloads.innerHTML = "";
+
+    // Fetch latest release information from GitHub API
+    try {
+        const response = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=1`);
+        const releasesData = await response.json();
+
+        if (Array.isArray(releasesData) && releasesData.length > 0) {
+            const latestRelease = releasesData[0];
+
+            // Group assets by OS
+            const assetsByOS = {};
+
+            latestRelease.assets.forEach(asset => {
+                const os = getOSFromAssetName(asset.name);
+                if (!assetsByOS[os]) {
+                    assetsByOS[os] = [];
+                }
+                assetsByOS[os].push(asset);
+            });
+
+            // Add dropdown items for userOS
+            const osAssets = assetsByOS[userOS];
+            if (osAssets) {
+                osAssets.forEach(asset => {
+                    const li = document.createElement("li");
+                    const a = document.createElement("a");
+                    a.className = "dropdown-item";
+                    a.href = asset.browser_download_url;
+                    a.textContent = getAssetName(asset.name);
+                    li.appendChild(a);
+                    dropdownMenu.appendChild(li);
+                });
+            }
+
+            // Add not userOS downloads
+            Object.keys(assetsByOS).forEach(os => {
+                if (os !== userOS) {
+                    const notUserOSDiv = createNotUserOSDiv(os, assetsByOS[os]);
+                    notUserOSDownloads.appendChild(notUserOSDiv);
+                }
+            });
+        }
+    } catch (error) {
+        console.error("Error fetching release information:", error);
+    }
+}
+
 function getUserOS() {
     const userAgent = navigator.userAgent;
     if (userAgent.indexOf("Win") !== -1) {
@@ -165,69 +227,6 @@ function getUserOS() {
         return "Android";
     }
     return "Unknown";
-}
-
-async function getLatestRelease() {
-    const userOS = getUserOS();
-    const dropdownMenu = document.querySelector("#mainDownloadBtn .dropdown-menu");
-    const notUserOSDownloads = document.getElementById("notUserOSDownloads");
-
-    if (userOS === "Unknown") {
-        console.error("Unknown userAgent");
-        document.getElementById("mainDownloadBtn").classList.add("d-none");
-    } else {
-        document.getElementById("userOS").textContent = "for " + userOS;
-        document.getElementById("mainDownloadBtn").classList.remove("d-none");
-
-        // Clear existing dropdown items and not userOS downloads
-        dropdownMenu.innerHTML = "";
-        notUserOSDownloads.innerHTML = "";
-
-        // Fetch latest release information from GitHub API
-        try {
-            const response = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=1`);
-            const releasesData = await response.json();
-
-            if (Array.isArray(releasesData) && releasesData.length > 0) {
-                const latestRelease = releasesData[0];
-
-                // Group assets by OS
-                const assetsByOS = {};
-
-                latestRelease.assets.forEach(asset => {
-                    const os = getOSFromAssetName(asset.name);
-                    if (!assetsByOS[os]) {
-                        assetsByOS[os] = [];
-                    }
-                    assetsByOS[os].push(asset);
-                });
-
-                // Add dropdown items for userOS
-                const osAssets = assetsByOS[userOS];
-                if (osAssets) {
-                    osAssets.forEach(asset => {
-                        const li = document.createElement("li");
-                        const a = document.createElement("a");
-                        a.className = "dropdown-item";
-                        a.href = asset.browser_download_url;
-                        a.textContent = getAssetName(asset.name);
-                        li.appendChild(a);
-                        dropdownMenu.appendChild(li);
-                    });
-                }
-
-                // Add not userOS downloads
-                Object.keys(assetsByOS).forEach(os => {
-                    if (os !== userOS) {
-                        const notUserOSDiv = createNotUserOSDiv(os, assetsByOS[os]);
-                        notUserOSDownloads.appendChild(notUserOSDiv);
-                    }
-                });
-            }
-        } catch (error) {
-            console.error("Error fetching release information:", error);
-        }
-    }
 }
 
 function getOSFromAssetName(assetName) {
@@ -252,7 +251,7 @@ function capitalizeFirstLetter(string) {
 
 function createNotUserOSDiv(os, assets) {
     const notUserOSDiv = document.createElement("div");
-    notUserOSDiv.className = "rounded border mt-3 p-3 notUserOS";
+    notUserOSDiv.className = "rounded border mt-3 p-3";
 
     const innerDiv = document.createElement("div");
     innerDiv.className = "d-flex justify-content-between align-items-center";
