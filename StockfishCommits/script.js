@@ -89,7 +89,7 @@ function fetchCommits(page) {
                 commitRow.innerHTML = `<td class="p-3">
                     <div class="d-flex mb-0">
                         <div>${authorString + committerString}<span class="mb-0" title="${commit.commit.committer.date.replace(/T|Z/g, " ")}"> | ${formatRelativeTime(commit.commit.committer.date)}</span></div>
-                        <div class="ms-auto"><a href="${commitUrl + commit.sha}" target="_blank" title="${commit.sha}" class="monospace">${commit.sha.substring(0,8)}</a></div>
+                        <div class="ms-auto"><a href="${commitUrl + commit.sha}" target="_blank" title="${commit.sha}" class="monospace">${commit.sha.substring(0, 8)}</a></div>
                     </div>
                     <p class="code small monospace mb-0 fs-5"><a href="${commitUrl + commit.sha}" target="_blank" title="${commit.sha}"><strong>${firstLine}</strong></a></p>
                     <p class="code small monospace mb-0">${restOfText}</p>
@@ -153,5 +153,190 @@ function updatePagination() {
     });
 }
 
+async function getLatestRelease() {
+    const userOS = getUserOS();
+    const dropdownMenu = document.querySelector("#mainDownloadBtn .dropdown-menu");
+    const notUserOSDownloads = document.getElementById("notUserOSDownloads");
+
+    if (userOS === "Unknown") {
+        console.log("Unknown userAgent");
+        document.getElementById("mainDownloadBtn").classList.add("d-none");
+    } else {
+        document.getElementById("userOS").textContent = "for " + userOS;
+        document.getElementById("mainDownloadBtn").classList.remove("d-none");
+    }
+    // Clear existing dropdown items and not userOS downloads
+    dropdownMenu.innerHTML = "";
+    notUserOSDownloads.innerHTML = "";
+
+    // Fetch latest release information from GitHub API
+    try {
+        const response = await fetch(`https://api.github.com/repos/${repo}/releases?per_page=1`);
+        const releasesData = await response.json();
+
+        if (Array.isArray(releasesData) && releasesData.length > 0) {
+            document.getElementById("accordionDownload").classList.remove("d-none");
+            const latestRelease = releasesData[0];
+            document.getElementById("downloadVersion").title = latestRelease.name;
+
+            // Group assets by OS
+            const assetsByOS = {};
+
+            latestRelease.assets.forEach(asset => {
+                const os = getOSFromAssetName(asset.name);
+                if (!assetsByOS[os]) {
+                    assetsByOS[os] = [];
+                }
+                assetsByOS[os].push(asset);
+            });
+
+            // Add dropdown items for userOS
+            const osAssets = assetsByOS[userOS];
+            if (osAssets) {
+                osAssets.sort((a, b) => customSortKey(a) - customSortKey(b));
+                osAssets.forEach(asset => {
+                    const li = document.createElement("li");
+                    const a = document.createElement("a");
+                    a.className = "dropdown-item";
+                    a.href = asset.browser_download_url;
+                    a.textContent = getAssetName(asset.name);
+                    li.appendChild(a);
+                    dropdownMenu.appendChild(li);
+                });
+            }
+
+            // Add not userOS downloads
+            Object.keys(assetsByOS).forEach(os => {
+                if (os !== userOS) {
+                    const notUserOSDiv = createNotUserOSDiv(os, assetsByOS[os]);
+                    notUserOSDownloads.appendChild(notUserOSDiv);
+                }
+            });
+        }
+    } catch (error) {
+        console.error("Error fetching release information:", error);
+        document.getElementById("accordionDownload").classList.add("d-none");
+    }
+}
+
+function getUserOS() {
+    const userAgent = navigator.userAgent;
+    if (userAgent.indexOf("Win") !== -1) {
+        return "Windows";
+    } else if (
+        userAgent.indexOf("Android") !== -1 ||
+        userAgent.indexOf("Raspberry") !== -1
+    ) {
+        return "Android";
+    } else if (userAgent.indexOf("Linux") !== -1) {
+        return "Linux";
+    } else if (userAgent.indexOf("Mac") !== -1) {
+        return "MacOS";
+    }
+    return "Unknown";
+}
+
+function getOSFromAssetName(assetName) {
+    const osMatches = ["windows", "ubuntu", "android", "macos"];
+    for (const os of osMatches) {
+        if (assetName.includes(os)) {
+            if (os === "ubuntu") return "Linux";
+            if (os === "macos") return "MacOS";
+            if (os === "android") return "ARM";
+            return capitalizeFirstLetter(os);
+        }
+    }
+    return "Other";
+}
+
+function getAssetName(assetName) {
+    return assetName.replace(/\w+?-\w+?-(.*?)\..*/, "$1");
+}
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function customSortKey(obj) {
+    const order = [
+        "apple-silicon",
+        "armv8-dotprod",
+        "armv8",
+        "armv7-neon",
+        "armv7",
+        "x86-64-vnni512",
+        "x86-64-vnni256",
+        "x86-64-avx512",
+        "x86-64-avxvnni",
+        "x86-64-bmi2",
+        "x86-64-avx2",
+        "x86-64-sse41-popcnt",
+        "x86-64-ssse3",
+        "x86-64-sse3-popcnt",
+        "x86-64",
+        "x86-32-sse41-popcnt",
+        "x86-32-sse2",
+        "x86-32",
+        "general-64",
+        "general-32",
+    ];
+
+    for (let i = 0; i < order.length; i++) {
+        if (obj.name.includes(order[i])) {
+            return i;
+        }
+    }
+    return order.length;
+}
+
+function createNotUserOSDiv(os, assets) {
+    const notUserOSDiv = document.createElement("div");
+    notUserOSDiv.className = "rounded border mt-3 p-3";
+
+    const innerDiv = document.createElement("div");
+    innerDiv.className = "d-flex justify-content-between align-items-center";
+
+    const h4 = document.createElement("div");
+    h4.className = "h4 mb-0";
+    h4.textContent = os;
+    innerDiv.appendChild(h4);
+
+    const dropdownDiv = document.createElement("div");
+    dropdownDiv.className = "d-flex";
+
+    const inputGroup = document.createElement("div");
+    inputGroup.className = "input-group";
+
+    const button = document.createElement("button");
+    button.className = "btn btn-secondary dropdown-toggle";
+    button.setAttribute("type", "button");
+    button.setAttribute("data-bs-toggle", "dropdown");
+    button.textContent = "Download";
+
+    const ul = document.createElement("ul");
+    ul.className = "dropdown-menu dropdown-menu-end";
+
+    assets.sort((a, b) => customSortKey(a) - customSortKey(b));
+
+    assets.forEach(asset => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.className = "dropdown-item";
+        a.href = asset.browser_download_url;
+        a.textContent = getAssetName(asset.name);
+        li.appendChild(a);
+        ul.appendChild(li);
+    });
+
+    inputGroup.appendChild(button);
+    inputGroup.appendChild(ul);
+    dropdownDiv.appendChild(inputGroup);
+    innerDiv.appendChild(dropdownDiv);
+    notUserOSDiv.appendChild(innerDiv);
+
+    return notUserOSDiv;
+}
+
 fetchCommits(currentPage);
 updatePagination();
+getLatestRelease();

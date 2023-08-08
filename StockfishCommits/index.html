@@ -28,6 +28,29 @@
         </nav>
     </header>
     <div class="container mb-3">
+        <div class="accordion border rounded shadow mb-3 p-3 d-none" id="accordionDownload">
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="h4 mb-0">Download <abbr id="downloadVersion">latest</abbr> <span id="userOS"></span></div>
+
+                <div class="d-flex">
+                    <div id="mainDownloadBtn" class="input-group d-none">
+                        <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">Download</button>
+                        <ul class="dropdown-menu dropdown-menu-end"></ul>
+                    </div>
+
+                    <div class="d-flex ms-2">
+                        <button class="accordion-button collapsed shadow-none border rounded px-2 py-0" type="button" data-bs-toggle="collapse" data-bs-target="#otherDownloads"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="otherDownloads" class="accordion-collapse collapse" data-bs-parent="#accordionDownload">
+                <hr>
+                <div id="notUserOSDownloads"></div>
+            </div>
+        </div>
+
         <table class="table table-striped">
             <tbody id="commitsBody"></tbody>
         </table>
