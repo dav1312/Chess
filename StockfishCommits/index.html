@@ -28,6 +28,83 @@
         </nav>
     </header>
     <div class="container mb-3">
+        <div class="accordion rounded shadow mb-3 p-3" id="accordionDownload">
+
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="h4 mb-0">Download latest version <span class="userOS">for Windows</span></div>
+
+                <div class="d-flex">
+                    <div class="input-group">
+                        <button class="btn btn-outline-primary">Download now (AVX-2)</button>
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li class="dropdown-item text-center small disabled">Other <span class="userOS">Windows</span> versions</li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">AVX-512</a></li>
+                            <li><a class="dropdown-item" href="#">VNNI-512</a></li>
+                            <li><a class="dropdown-item" href="#">VNNI-256</a></li>
+                            <li><a class="dropdown-item" href="#">BMI-2</a></li>
+                            <li><a class="dropdown-item" href="#">SSE41-POPCNT</a></li>
+                            <li><a class="dropdown-item" href="#">x86-64</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="d-flex ms-2">
+                        <button class="accordion-button collapsed rounded px-2 py-0" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionDownload">
+                <hr>
+                <div class="rounded border mt-3 p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="h4 mb-0">Android</span></div>
+                        <div class="d-flex">
+                            <div class="input-group">
+                                <button class="btn btn-outline-primary">Download now (ARMv8)</button>
+                                <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li class="dropdown-item text-center small disabled">Other <span class="notUserOS"></span> versions</li>
+                                    <li><hr class="dropdown-divider"></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="rounded border mt-3 p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="h4 mb-0">Linux</span></div>
+                        <div class="d-flex">
+                            <div class="input-group">
+                                <button class="btn btn-outline-primary">Download now (AVX-2)</button>
+                                <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li class="dropdown-item text-center small disabled">Other <span class="notUserOS"></span> versions</li>
+                                    <li><hr class="dropdown-divider"></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="rounded border mt-3 p-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="h4 mb-0">MacOS</span></div>
+                        <div class="d-flex">
+                            <div class="input-group">
+                                <button class="btn btn-outline-primary">Download now (AVX-2)</button>
+                                <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li class="dropdown-item text-center small disabled">Other <span class="notUserOS"></span> versions</li>
+                                    <li><hr class="dropdown-divider"></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <table class="table table-striped">
             <tbody id="commitsBody"></tbody>
         </table>
