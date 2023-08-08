@@ -153,5 +153,129 @@ function updatePagination() {
     });
 }
 
+function getUserOS() {
+    const userAgent = navigator.userAgent;
+    if (userAgent.indexOf("Win") !== -1) {
+        return "Windows";
+    } else if (userAgent.indexOf("Linux") !== -1) {
+        return "Linux";
+    } else if (userAgent.indexOf("Mac") !== -1) {
+        return "MacOS";
+     } else if (userAgent.indexOf("Android") !== -1) {
+        return "Android";
+    }
+    return "Unknown";
+}
+
+const releases = {
+    "Windows": [
+        ["VNNI-512", "windows-x86-64-vnni512.zip"],
+        ["VNNI-256", "windows-x86-64-vnni256.zip"],
+        ["AVX-512", "windows-x86-64-avx512.zip"],
+        ["BMI-2", "windows-x86-64-bmi2.zip"],
+        ["AVX-2", "windows-x86-64-avx2.zip"],
+        ["SSE41-POPCNT", "windows-x86-64-sse41-popcnt.zip"],
+        ["64-bit", "windows-x86-64.zip"],
+    ],
+    "Linux": [
+        ["VNNI-512", "ubuntu-x86-64-vnni512.tar"],
+        ["VNNI-256", "ubuntu-x86-64-vnni256.tar"],
+        ["AVX-512", "ubuntu-x86-64-avx512.tar"],
+        ["BMI-2", "ubuntu-x86-64-bmi2.tar"],
+        ["AVX-2", "ubuntu-x86-64-avx2.tar"],
+        ["SSE41-POPCNT", "ubuntu-x86-64-sse41-popcnt.tar"],
+        ["64-bit", "ubuntu-x86-64.tar"],
+        ["32-bit", "ubuntu-x86-32.tar"],
+    ],
+    "MacOS": [
+        ["BMI-2", "macos-x86-64-bmi2.tar"],
+        ["AVX-2", "macos-x86-64-avx2.tar"],
+        ["SSE41-POPCNT", "macos-x86-64-sse41-popcnt.tar"],
+        ["64-bit", "macos-x86-64.tar"],
+    ],
+    "Android": [
+        ["ARMv8 DotProd", "android-armv8-dotprod.tar"],
+        ["ARMv8", "android-armv8.tar"],
+        ["ARMv7 Neon", "android-armv7-neon.tar"],
+        ["ARMv7", "android-armv7.tar"],
+    ],
+}
+
+function getLatestRelease() {
+    console.log("Getting releases...");
+    const downloadLink = `https://github.com/${repo}/releases/download/stockfish-dev-20230807-5c2111cc/stockfish-`;
+    const userOS = getUserOS();
+    const dropdownMenu = document.querySelector("#mainDownloadBtn .dropdown-menu");
+
+    if (userOS === "Unknown") {
+        console.error("Unknown userAgent");
+        document.getElementById("mainDownloadBtn").classList.add("d-none");
+    } else {
+        document.getElementById("userOS").textContent = "for " + userOS;
+        document.getElementById("mainDownloadBtn").classList.remove("d-none");
+        dropdownMenu.innerHTML = "";
+        const osReleases = releases[userOS];
+        if (osReleases) {
+            osReleases.forEach(release => {
+                const li = document.createElement("li");
+                const a = document.createElement("a");
+                a.className = "dropdown-item";
+                a.href = `${downloadLink}${release[1]}`;
+                a.textContent = release[0];
+                li.appendChild(a);
+                dropdownMenu.appendChild(li);
+            });
+        }
+    }
+
+    Object.keys(releases).forEach(os => {
+        if (os !== userOS) {
+            const notUserOSDiv = document.createElement("div");
+            notUserOSDiv.className = "rounded border mt-3 p-3 notUserOS";
+
+            const innerDiv = document.createElement("div");
+            innerDiv.className = "d-flex justify-content-between align-items-center";
+
+            const h4 = document.createElement("div");
+            h4.className = "h4 mb-0";
+            h4.textContent = os;
+            innerDiv.appendChild(h4);
+
+            const dropdownDiv = document.createElement("div");
+            dropdownDiv.className = "d-flex";
+
+            const inputGroup = document.createElement("div");
+            inputGroup.className = "input-group";
+
+            const button = document.createElement("button");
+            button.className = "btn btn-outline-primary dropdown-toggle";
+            button.setAttribute("type", "button");
+            button.setAttribute("data-bs-toggle", "dropdown");
+            button.textContent = "Download";
+
+            const ul = document.createElement("ul");
+            ul.className = "dropdown-menu dropdown-menu-end";
+
+            releases[os].forEach(release => {
+                const li = document.createElement("li");
+                const a = document.createElement("a");
+                a.className = "dropdown-item";
+                a.href = `${downloadLink}${release[1]}`;
+                a.textContent = release[0];
+                li.appendChild(a);
+                ul.appendChild(li);
+            });
+
+            inputGroup.appendChild(button);
+            inputGroup.appendChild(ul);
+            dropdownDiv.appendChild(inputGroup);
+            innerDiv.appendChild(dropdownDiv);
+            notUserOSDiv.appendChild(innerDiv);
+            notUserOSDownloads.appendChild(notUserOSDiv);
+        }
+    });
+}
+
 fetchCommits(currentPage);
 updatePagination();
+getLatestRelease();
