@@ -159,7 +159,7 @@ async function getLatestRelease() {
     const notUserOSDownloads = document.getElementById("notUserOSDownloads");
 
     if (userOS === "Unknown") {
-        console.error("Unknown userAgent:", userOS);
+        console.error("Unknown userAgent");
         document.getElementById("mainDownloadBtn").classList.add("d-none");
     } else {
         document.getElementById("userOS").textContent = "for " + userOS;
