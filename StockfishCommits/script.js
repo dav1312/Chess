@@ -191,6 +191,7 @@ async function getLatestRelease() {
             // Add dropdown items for userOS
             const osAssets = assetsByOS[userOS];
             if (osAssets) {
+                osAssets.sort((a, b) => customSortKey(a) - customSortKey(b));
                 osAssets.forEach(asset => {
                     const li = document.createElement("li");
                     const a = document.createElement("a");
@@ -235,6 +236,7 @@ function getOSFromAssetName(assetName) {
         if (assetName.includes(os)) {
             if (os === "ubuntu") return "Linux";
             if (os === "macos") return "MacOS";
+            if (os === "android") return "ARM";
             return capitalizeFirstLetter(os);
         }
     }
@@ -247,6 +249,30 @@ function getAssetName(assetName) {
 
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function customSortKey(obj) {
+    const order = [
+        "armv8-dotprod",
+        "armv8",
+        "armv7-neon",
+        "armv7",
+        "x86-64-avx512",
+        "x86-64-vnni512",
+        "x86-64-vnni256",
+        "x86-64-bmi2",
+        "x86-64-avx2",
+        "x86-64-sse41-popcnt",
+        "x86-64",
+        "x86-32"
+    ];
+
+    for (let i = 0; i < order.length; i++) {
+        if (obj.name.includes(order[i])) {
+            return i;
+        }
+    }
+    return order.length;
 }
 
 function createNotUserOSDiv(os, assets) {
@@ -275,6 +301,8 @@ function createNotUserOSDiv(os, assets) {
 
     const ul = document.createElement("ul");
     ul.className = "dropdown-menu dropdown-menu-end";
+
+    assets.sort((a, b) => customSortKey(a) - customSortKey(b));
 
     assets.forEach(asset => {
         const li = document.createElement("li");
