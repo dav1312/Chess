@@ -159,7 +159,7 @@ async function getLatestRelease() {
     const notUserOSDownloads = document.getElementById("notUserOSDownloads");
 
     if (userOS === "Unknown") {
-        console.error("Unknown userAgent");
+        console.log("Unknown userAgent");
         document.getElementById("mainDownloadBtn").classList.add("d-none");
     } else {
         document.getElementById("userOS").textContent = "for " + userOS;
@@ -294,7 +294,7 @@ function createNotUserOSDiv(os, assets) {
     inputGroup.className = "input-group";
 
     const button = document.createElement("button");
-    button.className = "btn btn-outline-primary dropdown-toggle";
+    button.className = "btn btn-secondary dropdown-toggle";
     button.setAttribute("type", "button");
     button.setAttribute("data-bs-toggle", "dropdown");
     button.textContent = "Download";
