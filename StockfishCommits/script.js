@@ -158,7 +158,7 @@ async function getLatestRelease() {
     const dropdownMenu = document.querySelector("#mainDownloadBtn .dropdown-menu");
     const notUserOSDownloads = document.getElementById("notUserOSDownloads");
 
-    if (userOS === "Unknown") {
+    if (userOS === "Other") {
         console.log("Unknown userAgent");
         document.getElementById("mainDownloadBtn").classList.add("d-none");
     } else {
@@ -220,30 +220,24 @@ async function getLatestRelease() {
 }
 
 function getUserOS() {
-    const userAgent = navigator.userAgent;
-    if (userAgent.indexOf("Win") !== -1) {
-        return "Windows";
-    } else if (
-        userAgent.indexOf("Android") !== -1 ||
-        userAgent.indexOf("Raspberry") !== -1
-    ) {
-        return "ARM";
-    } else if (userAgent.indexOf("Linux") !== -1) {
-        return "Linux";
-    } else if (userAgent.indexOf("Mac") !== -1) {
-        return "MacOS";
-    }
-    return "Unknown";
+    const userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.includes("win")) return "Windows";
+    if (userAgent.includes("android") || userAgent.includes("raspberry")) return "ARM";
+    if (userAgent.includes("linux")) return "Linux";
+    if (userAgent.includes("mac")) return "MacOS";
+    return "Other";
 }
 
 function getOSFromAssetName(assetName) {
-    const osMatches = ["windows", "ubuntu", "android", "macos"];
-    for (const os of osMatches) {
+    const osMatches = {
+        "windows": "Windows",
+        "ubuntu": "Linux",
+        "android": "ARM",
+        "macos": "MacOS"
+    };
+    for (const os in osMatches) {
         if (assetName.includes(os)) {
-            if (os === "windows") return "Windows";
-            if (os === "ubuntu") return "Linux";
-            if (os === "android") return "ARM";
-            if (os === "macos") return "MacOS";
+            return osMatches[os];
         }
     }
     return "Other";
@@ -289,46 +283,32 @@ function createNotUserOSDiv(os, assets) {
     const notUserOSDiv = document.createElement("div");
     notUserOSDiv.className = "rounded border mt-3 p-3";
 
-    const innerDiv = document.createElement("div");
-    innerDiv.className = "d-flex justify-content-between align-items-center";
+    const assetsList = assets.sort((a, b) => customSortKey(a) - customSortKey(b)).map(asset => `
+        <li>
+            <a class="dropdown-item" href="${asset.browser_download_url}">
+                ${getAssetName(asset.name)}
+            </a>
+        </li>`).join('');
 
-    const h4 = document.createElement("div");
-    h4.className = "h4 mb-0";
-    h4.textContent = os;
-    innerDiv.appendChild(h4);
+    const dropdownHTML = `
+        <div class="d-flex">
+            <div class="input-group">
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    Download
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    ${assetsList}
+                </ul>
+            </div>
+        </div>`;
 
-    const dropdownDiv = document.createElement("div");
-    dropdownDiv.className = "d-flex";
+    const innerHTML = `
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="h4 mb-0">${os}</div>
+            ${dropdownHTML}
+        </div>`;
 
-    const inputGroup = document.createElement("div");
-    inputGroup.className = "input-group";
-
-    const button = document.createElement("button");
-    button.className = "btn btn-secondary dropdown-toggle";
-    button.setAttribute("type", "button");
-    button.setAttribute("data-bs-toggle", "dropdown");
-    button.textContent = "Download";
-
-    const ul = document.createElement("ul");
-    ul.className = "dropdown-menu dropdown-menu-end";
-
-    assets.sort((a, b) => customSortKey(a) - customSortKey(b));
-
-    assets.forEach(asset => {
-        const li = document.createElement("li");
-        const a = document.createElement("a");
-        a.className = "dropdown-item";
-        a.href = asset.browser_download_url;
-        a.textContent = getAssetName(asset.name);
-        li.appendChild(a);
-        ul.appendChild(li);
-    });
-
-    inputGroup.appendChild(button);
-    inputGroup.appendChild(ul);
-    dropdownDiv.appendChild(inputGroup);
-    innerDiv.appendChild(dropdownDiv);
-    notUserOSDiv.appendChild(innerDiv);
+    notUserOSDiv.innerHTML = innerHTML;
 
     return notUserOSDiv;
 }
