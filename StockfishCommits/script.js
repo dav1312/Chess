@@ -224,7 +224,10 @@ function getUserOS() {
         return "Linux";
     } else if (userAgent.indexOf("Mac") !== -1) {
         return "MacOS";
-     } else if (userAgent.indexOf("Android") !== -1) {
+     } else if (
+        userAgent.indexOf("Android") !== -1 ||
+        userAgent.indexOf("Raspberry") !== -1
+    ) {
         return "Android";
     }
     return "Unknown";
