@@ -175,7 +175,9 @@ async function getLatestRelease() {
         const releasesData = await response.json();
 
         if (Array.isArray(releasesData) && releasesData.length > 0) {
+            document.getElementById("accordionDownload").classList.remove("d-none");
             const latestRelease = releasesData[0];
+            document.getElementById("downloadVersion").title = latestRelease.name;
 
             // Group assets by OS
             const assetsByOS = {};
@@ -213,6 +215,7 @@ async function getLatestRelease() {
         }
     } catch (error) {
         console.error("Error fetching release information:", error);
+        document.getElementById("accordionDownload").classList.add("d-none");
     }
 }
 
