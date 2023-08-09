@@ -259,6 +259,7 @@ function capitalizeFirstLetter(string) {
 
 function customSortKey(obj) {
     const order = [
+        "apple-silicon",
         "armv8-dotprod",
         "armv8",
         "armv7-neon",
@@ -266,11 +267,18 @@ function customSortKey(obj) {
         "x86-64-vnni512",
         "x86-64-vnni256",
         "x86-64-avx512",
+        "x86-64-avxvnni",
         "x86-64-bmi2",
         "x86-64-avx2",
         "x86-64-sse41-popcnt",
+        "x86-64-ssse3",
+        "x86-64-sse3-popcnt",
         "x86-64",
+        "x86-32-sse41-popcnt",
+        "x86-32-sse2",
         "x86-32",
+        "general-64",
+        "general-32",
     ];
 
     for (let i = 0; i < order.length; i++) {
