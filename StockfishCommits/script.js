@@ -227,7 +227,7 @@ function getUserOS() {
         userAgent.indexOf("Android") !== -1 ||
         userAgent.indexOf("Raspberry") !== -1
     ) {
-        return "Android";
+        return "ARM";
     } else if (userAgent.indexOf("Linux") !== -1) {
         return "Linux";
     } else if (userAgent.indexOf("Mac") !== -1) {
@@ -240,10 +240,10 @@ function getOSFromAssetName(assetName) {
     const osMatches = ["windows", "ubuntu", "android", "macos"];
     for (const os of osMatches) {
         if (assetName.includes(os)) {
+            if (os === "windows") return "Windows";
             if (os === "ubuntu") return "Linux";
-            if (os === "macos") return "MacOS";
             if (os === "android") return "ARM";
-            return capitalizeFirstLetter(os);
+            if (os === "macos") return "MacOS";
         }
     }
     return "Other";
@@ -251,10 +251,6 @@ function getOSFromAssetName(assetName) {
 
 function getAssetName(assetName) {
     return assetName.replace(/\w+?-\w+?-(.*?)\..*/, "$1");
-}
-
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function customSortKey(obj) {
