@@ -257,14 +257,14 @@ function customSortKey(obj) {
         "armv8",
         "armv7-neon",
         "armv7",
-        "x86-64-avx512",
         "x86-64-vnni512",
         "x86-64-vnni256",
+        "x86-64-avx512",
         "x86-64-bmi2",
         "x86-64-avx2",
         "x86-64-sse41-popcnt",
         "x86-64",
-        "x86-32"
+        "x86-32",
     ];
 
     for (let i = 0; i < order.length; i++) {
