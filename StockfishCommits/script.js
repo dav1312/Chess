@@ -77,19 +77,25 @@ function fetchCommits(page) {
 
             commits.forEach(commit => {
                 const commitRow = document.createElement('tr');
-                const committerString = `<strong>Committer: </strong><a href="${commit.committer.html_url}" target="_blank">${commit.committer.login}</a>`;
+                const committerString = `<span class="d-block d-sm-inline"><strong>Committer: </strong><a href="${commit.committer.html_url}" target="_blank">${commit.committer.login}</a></span>`;
                 let authorString = "";
                 if (commit.author === null) {
-                    authorString = `<strong>Author: </strong>${commit.commit.author.name} | `;
+                    authorString = `<span class="d-block d-sm-inline"><strong>Author: </strong>${commit.commit.author.name}</span><span class="d-none d-sm-inline"> | </span>`;
                 } else if (commit.author.id !== commit.committer.id) {
-                    authorString = `<strong>Author: </strong><a href="${commit.author.html_url}" target="_blank">${commit.author.login}</a> | `;
+                    authorString = `<span class="d-block d-sm-inline"><strong>Author: </strong><a href="${commit.author.html_url}" target="_blank">${commit.author.login}</a></span><span class="d-none d-sm-inline"> | </span>`;
                 }
                 const [firstLine, ...restOfTextLines] = formatCommitMessage(commit.commit.message).split('\n');
                 const restOfText = restOfTextLines.join('\n');
                 commitRow.innerHTML = `<td class="p-3">
                     <div class="d-flex mb-0">
-                        <div>${authorString + committerString}<span class="mb-0" title="${commit.commit.committer.date.replace(/T|Z/g, " ")}"> | ${formatRelativeTime(commit.commit.committer.date)}</span></div>
-                        <div class="ms-auto"><a href="${commitUrl + commit.sha}" target="_blank" title="${commit.sha}" class="monospace">${commit.sha.substring(0, 8)}</a></div>
+                        <div>
+                            ${authorString + committerString}
+                            <span class="d-none d-sm-inline"> | </span>
+                            <span class="d-block d-sm-inline mb-0" title="${commit.commit.committer.date.replace(/T|Z/g, " ")}">${formatRelativeTime(commit.commit.committer.date)}</span>
+                        </div>
+                        <div class="ms-auto">
+                            <a href="${commitUrl + commit.sha}" target="_blank" title="${commit.sha}" class="monospace">${commit.sha.substring(0, 8)}</a>
+                        </div>
                     </div>
                     <p class="code small monospace mb-0 fs-5"><a href="${commitUrl + commit.sha}" target="_blank" title="${commit.sha}"><strong>${firstLine}</strong></a></p>
                     <p class="code small monospace mb-0">${restOfText}</p>
