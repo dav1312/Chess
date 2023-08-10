@@ -9,17 +9,6 @@
 
 ---
 
-<h1 align="center">Stockfish Dev Builds</h1>
-<p align="center">
-	<a href="https://dav1312.github.io/Chess/StockfishDevBuilds">https://dav1312.github.io/Chess/StockfishDevBuilds</a>
-</p>
-<p align="center">Download the latest Stockfish development builds for Windows from <a href="https://abrok.eu/stockfish/">abrok.eu</a></p>
-<p align="center">
-	<img width="650" src="./StockfishDevBuilds/img.png">
-</p>
-
----
-
 <h1 align="center">Winrate Calculator</h1>
 <p align="center">
 	<a href="https://dav1312.github.io/Chess/WinrateCalculator">https://dav1312.github.io/Chess/WinrateCalculator</a>
