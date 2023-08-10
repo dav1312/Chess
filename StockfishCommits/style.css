@@ -31,6 +31,12 @@
     --bs-table-striped-bg: var(--bs-table-active-bg);
 }
 
-.nav-link {
-    fill: var(--bs-nav-link-color)
+#change-color-theme .nav-link {
+    fill: var(--bs-nav-link-color);
+    cursor: pointer;
+}
+
+#change-color-theme .nav-link:focus,
+#change-color-theme .nav-link:hover {
+    fill: var(--bs-nav-link-hover-color);
 }
