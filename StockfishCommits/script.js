@@ -117,7 +117,24 @@ function fetchCommits(page) {
         });
 }
 
+const entityMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '`': '&#x60;',
+    '=': '&#x3D;',
+    '&#': '&#x26;&#x23;'
+};
+
+function escapeHtml(string) {
+    return String(string).replace(/[&<>"'`=]/g, s => entityMap[s]);
+}
+
 function formatCommitMessage(message) {
+    message = escapeHtml(message);
+
     const urlRegex = /\bhttps?:\/\/[^\s\/$.?#].[^\s]*/gi;
     message = message.replace(urlRegex, '<a href="$&" target="_blank">$&</a>');
 
