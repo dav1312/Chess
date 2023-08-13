@@ -160,21 +160,29 @@ function formatCommitMessage(message) {
     return message;
 }
 
-function updatePagination() {
-    document.getElementById('prev').addEventListener('click', () => {
-        event.preventDefault();
-        if (currentPage > 1) {
-            currentPage--;
-            fetchCommits(currentPage);
-        }
-    });
-
-    document.getElementById('next').addEventListener('click', () => {
-        event.preventDefault();
-        currentPage++;
+function prevPage() {
+    if (currentPage > 1) {
+        currentPage--;
         fetchCommits(currentPage);
-    });
+    }
 }
+
+function nextPage() {
+    currentPage++;
+    fetchCommits(currentPage);
+}
+
+document.addEventListener("keyup", (event) => {
+    if (event.key === "ArrowLeft") {
+        prevPage();
+    } else if (event.key === "ArrowRight") {
+        nextPage();
+    }
+});
+
+document.getElementById('prev').addEventListener('click', prevPage);
+
+document.getElementById('next').addEventListener('click', nextPage);
 
 async function getLatestRelease() {
     const userOS = getUserOS();
@@ -337,5 +345,4 @@ function createNotUserOSDiv(os, assets) {
 }
 
 fetchCommits(currentPage);
-updatePagination();
 getLatestRelease();
