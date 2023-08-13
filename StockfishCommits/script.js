@@ -80,7 +80,7 @@ function fetchCommits(page) {
 
                 let committerInfo = "";
                 if (commit.committer === null || Object.keys(commit.committer).length === 0) {
-                    committerInfo = `<abbr class="text-danger" title="Issue with committer">${commit.commit.committer.name}</abbr>`;
+                    committerInfo = `<abbr class="text-danger" title="Issue with committer.\nCheck console for more info.">${commit.commit.committer.name}</abbr>`;
                     console.log("Issue with committer:", [commit.commit.committer.name, commit.commit.committer.email, commit.sha.substring(0, 8), commit]);
                 } else {
                     committerInfo = `<a href="${commit.committer.html_url}" target="_blank">${commit.committer.login}</a>`;
@@ -89,7 +89,7 @@ function fetchCommits(page) {
 
                 let authorInfo = "";
                 if (commit.author === null || Object.keys(commit.author).length === 0) {
-                    authorInfo = `<abbr class="text-danger" title="Issue with author">${commit.commit.author.name}</abbr>`;
+                    authorInfo = `<abbr class="text-danger" title="Issue with author.\nCheck console for more info.">${commit.commit.author.name}</abbr>`;
                     console.log("Issue with author:", [commit.commit.author.name, commit.commit.author.email, commit.sha.substring(0, 8), commit]);
                 } else {
                     authorInfo = `<a href="${commit.author.html_url}" target="_blank">${commit.author.login}</a>`;
