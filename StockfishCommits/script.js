@@ -77,13 +77,32 @@ function fetchCommits(page) {
 
             commits.forEach(commit => {
                 const commitRow = document.createElement('tr');
-                const committerString = `<span class="d-block d-sm-inline"><strong>Committer: </strong><a href="${commit.committer.html_url}" target="_blank">${commit.committer.login}</a></span>`;
-                let authorString = "";
-                if (commit.author === null) {
-                    authorString = `<span class="d-block d-sm-inline"><strong>Author: </strong>${commit.commit.author.name}</span><span class="d-none d-sm-inline"> | </span>`;
-                } else if (commit.author.id !== commit.committer.id) {
-                    authorString = `<span class="d-block d-sm-inline"><strong>Author: </strong><a href="${commit.author.html_url}" target="_blank">${commit.author.login}</a></span><span class="d-none d-sm-inline"> | </span>`;
+
+                let committerInfo = "";
+                if (commit.committer === null || Object.keys(commit.committer).length === 0) {
+                    committerInfo = `<abbr class="text-danger" title="Issue with committer">${commit.commit.committer.name}</abbr>`;
+                    console.log("Issue with committer:", [commit.commit.committer.name, commit.commit.committer.email, commit.sha.substring(0, 8), commit]);
+                } else {
+                    committerInfo = `<a href="${commit.committer.html_url}" target="_blank">${commit.committer.login}</a>`;
                 }
+                const committerString = `<span class="d-block d-sm-inline"><strong>Committer: </strong>${committerInfo}</span>`;
+
+                let authorInfo = "";
+                if (commit.author === null || Object.keys(commit.author).length === 0) {
+                    authorInfo = `<abbr class="text-danger" title="Issue with author">${commit.commit.author.name}</abbr>`;
+                    console.log("Issue with author:", [commit.commit.author.name, commit.commit.author.email, commit.sha.substring(0, 8), commit]);
+                } else {
+                    authorInfo = `<a href="${commit.author.html_url}" target="_blank">${commit.author.login}</a>`;
+                }
+                let authorString = "";
+                if (
+                    ((commit.author === null || Object.keys(commit.author).length === 0) &&
+                        commit.commit.author.name !== commit.commit.committer.name) ||
+                    commit.commit.author.email !== commit.commit.committer.email
+                ) {
+                    authorString = `<span class="d-block d-sm-inline"><strong>Author: </strong>${authorInfo}</span><span class="d-none d-sm-inline"> | </span>`;
+                }
+
                 const [firstLine, ...restOfTextLines] = formatCommitMessage(commit.commit.message).split('\n');
                 const restOfText = restOfTextLines.join('\n');
                 commitRow.innerHTML = `<td class="p-3">
