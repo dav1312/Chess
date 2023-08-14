@@ -6,7 +6,7 @@ const input = document.getElementById("input"),
     regexEval = /label=(-?\d+)/gm,
     regexLabel = /label=(.*?)([,|\]])/gm,
     regexShapes = /label=(.*?),shape/gm,
-    pawnValue = 361,
+    pawnValue = 328, // https://github.com/official-stockfish/Stockfish/commit/52e84e4b4675aae52a619c309479684dc5478bf5
     replacerEvals = (_, p1) => `label=${(p1 / pawnValue).toFixed(2)}`;
 
 const process = () => {
