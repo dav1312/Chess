@@ -80,7 +80,7 @@ function fetchCommits(page) {
 
                 let committerInfo = "";
                 if (commit.committer === null || Object.keys(commit.committer).length === 0) {
-                    committerInfo = `<abbr class="text-danger" title="Issue with committer.\nCheck console for more info.">${commit.commit.committer.name}</abbr>`;
+                    committerInfo = `<abbr class="text-danger" title="Issue with committer\nCheck console for more info">${commit.commit.committer.name}</abbr>`;
                     console.log("Issue with committer:", [commit.commit.committer.name, commit.commit.committer.email, commit.sha.substring(0, 8), commit]);
                 } else {
                     committerInfo = `<a href="${commit.committer.html_url}" target="_blank">${commit.committer.login}</a>`;
@@ -89,7 +89,7 @@ function fetchCommits(page) {
 
                 let authorInfo = "";
                 if (commit.author === null || Object.keys(commit.author).length === 0) {
-                    authorInfo = `<abbr class="text-danger" title="Issue with author.\nCheck console for more info.">${commit.commit.author.name}</abbr>`;
+                    authorInfo = `<abbr class="text-danger" title="Issue with author\nCheck console for more info">${commit.commit.author.name}</abbr>`;
                     console.log("Issue with author:", [commit.commit.author.name, commit.commit.author.email, commit.sha.substring(0, 8), commit]);
                 } else {
                     authorInfo = `<a href="${commit.author.html_url}" target="_blank">${commit.author.login}</a>`;
@@ -210,11 +210,10 @@ async function getLatestRelease() {
 
     if (userOS === "Other") {
         console.log("Unknown userAgent");
+        document.getElementById("userOS").textContent = "";
         document.getElementById("mainDownloadBtn").classList.add("d-none");
-    } else {
-        document.getElementById("userOS").textContent = "for " + userOS;
-        document.getElementById("mainDownloadBtn").classList.remove("d-none");
     }
+
     // Clear existing dropdown items and not userOS downloads
     dropdownMenu.innerHTML = "";
     notUserOSDownloads.innerHTML = "";
@@ -242,7 +241,10 @@ async function getLatestRelease() {
 
             // Add dropdown items for userOS
             const osAssets = assetsByOS[userOS];
-            if (osAssets) {
+            if (osAssets && osAssets.length > 0) {
+                document.getElementById("userOS").textContent = "for " + userOS;
+                document.getElementById("mainDownloadBtn").classList.remove("d-none");
+
                 osAssets.sort((a, b) => customSortKey(a) - customSortKey(b));
                 osAssets.forEach(asset => {
                     const li = document.createElement("li");
@@ -253,6 +255,9 @@ async function getLatestRelease() {
                     li.appendChild(a);
                     dropdownMenu.appendChild(li);
                 });
+            } else {
+                document.getElementById("userOS").textContent = "";
+                document.getElementById("mainDownloadBtn").classList.add("d-none");
             }
 
             // Add not userOS downloads
