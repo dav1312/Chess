@@ -12,7 +12,8 @@ const toPov = (color, diff) => {
 }
 
 const rawWinningChances = (cp) => {
-	return 2 / (1 + Math.exp(-0.004 * cp)) - 1;
+	console.log(cp);
+	return 2 / (1 + Math.exp(-0.00368208 * cp)) - 1;
 }
 
 const cpWinningChances = (cp) => {
@@ -28,9 +29,12 @@ const povChances = (color, ev) => {
 }
 
 const updateEval = () => {
-	let ev = povChances("white", evalSlider.value);
+	const ev = povChances("white", evalSlider.value);
+	console.log(ev);
 	evalValue.textContent = evalSlider.value / 100;
-	blackBar.style.height = 100 - (ev + 1) * 50 + "%";
+	const percentage = 100 - (ev + 1) * 50;
+	console.log(percentage);
+	blackBar.style.height = percentage + "%";
 }
 
 evalSlider.addEventListener("input", updateEval);
