@@ -25,12 +25,12 @@ function setSign(v) {
 
 function getPatchType(message) {
     const gainerRegex = /LLR:.*?[<\[\{]0/;
-    const SimplRegex = /LLR:.*?[<\[\{]-/;
+    const simplRegex = /LLR:.*?[<\[\{]-/;
     if (message.includes("functional change")) {
         return "var(--bs-secondary)";
     } else if (gainerRegex.test(message)) {
         return "rgba(var(--bs-success-rgb), 1)";
-    } else if (SimplRegex.test(message)) {
+    } else if (simplRegex.test(message)) {
         return "var(--bs-blue)";
     }
     return "initial";
@@ -103,7 +103,7 @@ function fetchCommits(page) {
                     authorString = `<span class="d-block d-sm-inline"><strong>Author: </strong>${authorInfo}</span><span class="d-none d-sm-inline"> | </span>`;
                 }
 
-                const [firstLine, ...restOfTextLines] = formatCommitMessage(commit.commit.message).split('\n');
+                const [firstLine, ...restOfTextLines] = escapeHtml(commit.commit.message).split('\n');
                 const restOfText = restOfTextLines.join('\n');
                 commitRow.innerHTML = `<td class="p-3">
                     <div class="d-flex mb-0">
@@ -117,7 +117,7 @@ function fetchCommits(page) {
                         </div>
                     </div>
                     <p class="code small monospace mb-0 fs-5"><a href="${commitUrl + commit.sha}" target="_blank" title="${commit.sha}"><strong>${firstLine}</strong></a></p>
-                    <p class="code small monospace mb-0">${restOfText}</p>
+                    <p class="code small monospace mb-0">${formatCommitMessage(restOfText)}</p>
                 </td>`;
                 const patchType = getPatchType(commit.commit.message);
                 commitRow.style.borderLeft = `5px solid ${patchType}`;
@@ -152,8 +152,6 @@ function escapeHtml(string) {
 }
 
 function formatCommitMessage(message) {
-    message = escapeHtml(message);
-
     const urlRegex = /\bhttps?:\/\/[^\s\/$.?#].[^\s]*/gi;
     message = message.replace(urlRegex, '<a href="$&" target="_blank">$&</a>');
 
