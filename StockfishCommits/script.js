@@ -26,11 +26,17 @@ function setSign(v) {
 function getPatchType(message) {
     const gainerRegex = /LLR:.*?[<\[\{]0/;
     const simplRegex = /LLR:.*?[<\[\{]-/;
-    if (message.includes("functional change")) {
+    const nonFuncionalChange = message
+        .split('\n')
+        .slice(-5)
+        .some(line => line.includes('functional change'));
+    if (nonFuncionalChange) {
         return "var(--bs-secondary)";
-    } else if (gainerRegex.test(message)) {
+    }
+    if (gainerRegex.test(message)) {
         return "rgba(var(--bs-success-rgb), 1)";
-    } else if (simplRegex.test(message)) {
+    }
+    if (simplRegex.test(message)) {
         return "var(--bs-blue)";
     }
     return "initial";
@@ -153,21 +159,33 @@ function escapeHtml(string) {
 
 function formatCommitMessage(message) {
     const urlRegex = /\bhttps?:\/\/[^\s\/$.?#].[^\s]*/gi;
-    message = message.replace(urlRegex, '<a href="$&" target="_blank">$&</a>');
+    message = message.replace(urlRegex, match => {
+        const link = document.createElement('a');
+        link.href = encodeURI(match);
+        link.target = '_blank';
+        link.textContent = match;
+        return link.outerHTML;
+    });
 
     const nnueRegex = /\bnn-\w{12}\.nnue/g;
-    message = message.replace(nnueRegex, '<a href="https://tests.stockfishchess.org/api/nn/$&" target="_blank">$&</a>');
+    message = message.replace(nnueRegex, match => {
+        const link = document.createElement('a');
+        link.href = encodeURI(`https://tests.stockfishchess.org/api/nn/${match}`);
+        link.target = '_blank';
+        link.textContent = match;
+        return link.outerHTML;
+    });
 
-    const ptnmlRegex = /Ptnml\(0-2\): (\d+), (\d+), (\d+), (\d+), (\d+)/g;
+    const ptnmlRegex = /Ptnml\(0-2\): (\d+), ?(\d+), ?(\d+), ?(\d+), ?(\d+)/g;
     message = message.replace(ptnmlRegex, (match, ll, ld, d, wd, ww) => {
-        const l = parseInt(ll) + parseInt(ld);
-        const w = parseInt(ww) + parseInt(wd);
+        const l = parseInt(ll) * 2 + parseInt(ld);
+        const w = parseInt(ww) * 2 + parseInt(wd);
         const elo = calcEloFromWDL(parseInt(w), parseInt(d), parseInt(l)) / 2;
         const sign = setSign(elo);
         return `${match} (Elo: <span class="text-${sign === "+" ? "success" : "danger"}">${sign + elo.toFixed(2)}</span>)`;
     });
 
-    const eloRegex = /Total: \d+ W: (\d+) L: (\d+) D: (\d+)/g;
+    const eloRegex = /Total: \d+ W: ?(\d+) L: ?(\d+) D: ?(\d+)/g;
     message = message.replace(eloRegex, (match, w, l, d) => {
         const elo = calcEloFromWDL(parseInt(w), parseInt(d), parseInt(l));
         const sign = setSign(elo);
