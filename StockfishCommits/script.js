@@ -158,7 +158,7 @@ function escapeHtml(string) {
 }
 
 function formatCommitMessage(message) {
-    const urlRegex = /\bhttps?:\/\/[^\s\/$.?#].[^\s]*/gi;
+    const urlRegex = /\bhttps?:\/\/[^\s\/$.?#].[^\s\)]*/gi;
     message = message.replace(urlRegex, match => {
         const link = document.createElement('a');
         link.href = encodeURI(match);
