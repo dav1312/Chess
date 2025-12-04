@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fishtest Group Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .positive-llr {
+            color: #34d399;
+        }
+        .negative-llr {
+            color: #f87171;
+        }
+        .neutral-llr {
+            color: #9ca3af;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .ci-gray {
+            color: #6b7280;
+        }
+        .sortable-header, .sortable-header-compiler, .sortable-header-user {
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            padding-right: 20px;
+        }
+        .sortable-header:hover, .sortable-header-compiler:hover, .sortable-header-user:hover {
+            background-color: rgba(243, 244, 246, 0.1);
+        }
+        .sort-arrow {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .sort-asc::after {
+            content: '↑';
+            color: #3b82f6;
+        }
+        .sort-desc::after {
+            content: '↓';
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-100 mb-2">Fishtest Group Test</h1>
+            <p class="text-gray-400">Analyze and compare test results</p>
+        </header>
+
+        <main>
+            <section class="bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+                <h2 class="text-xl font-semibold text-gray-100 mb-4">Input Data</h2>
+                <textarea id="inputData" rows="5" class="w-full p-3 border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-700 text-gray-100" placeholder="Paste the contents of https://tests.stockfishchess.org/tests/tasks/<id> here..."></textarea>
+                <button id="analyzeBtn" class="mt-4 bg-blue-700 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors">Analyze Results</button>
+            </section>
+
+            <section id="results" class="hidden">
+                <div class="space-y-8">
+                    <!-- Summary Statistics at top -->
+                    <div id="summaryStats" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Summary statistics will be populated here -->
+                    </div>
+
+                    <!-- Architecture Summary Table -->
+                    <div class="table-responsive rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-700">
+                            <thead class="bg-gray-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="arch">Architecture</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="pentanomial">Pentanomial</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="elo">Elo (95% CI)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="llr1">LLR (0.5-2.5)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="llr2">LLR (0-2)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="llr3">LLR (-1.75-0.25)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryTableBody" class="bg-gray-800 divide-y divide-gray-700">
+                                <!-- Table rows will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Compiler Summary Table -->
+                    <div class="table-responsive rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-700">
+                            <thead class="bg-gray-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="compiler">Compiler</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="pentanomial">Pentanomial</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="elo">Elo (95% CI)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="llr1">LLR (0.5-2.5)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="llr2">LLR (0-2)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="llr3">LLR (-1.75-0.25)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="compilerSummaryTableBody" class="bg-gray-800 divide-y divide-gray-700">
+                                <!-- Table rows will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- User Summary Table -->
+                    <div class="table-responsive rounded-lg">
+                        <table class="min-w-full divide-y divide-gray-700">
+                            <thead class="bg-gray-700">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="user">User/Runner</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="pentanomial">Pentanomial</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="elo">Elo (95% CI)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="llr1">LLR (0.5-2.5)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="llr2">LLR (0-2)</th>
+                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="llr3">LLR (-1.75-0.25)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="userSummaryTableBody" class="bg-gray-800 divide-y divide-gray-700">
+                                <!-- Table rows will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // --- Core Calculation Functions ---
+        function score_to_elo(score) {
+            return -400 * Math.log(1 / score - 1) / Math.LN10;
+        }
+
+        function elo_to_score(elo) {
+            return (1 / (1 + Math.pow(10, (-elo / 400))));
+        }
+
+        function score_to_nelo_penta(score, std_deviation) {
+            return (score - 0.5) / (Math.sqrt(2) * std_deviation) * (800 / Math.LN10);
+        }
+
+        function score_to_nelo_wdl(score, std_deviation) {
+            return (score - 0.5) / (std_deviation) * (800 / Math.LN10);
+        }
+
+        function nelo_to_score_penta(nelo, std_deviation) {
+            return nelo * Math.sqrt(2) * std_deviation / (800 / Math.LN10) + 0.5;
+        }
+
+        function nelo_to_score_wdl(nelo, std_deviation) {
+            return nelo * std_deviation / (800 / Math.LN10) + 0.5;
+        }
+
+        function ncdf(x, mean, std) {
+            var x = (x - mean) / std;
+            var t = 1 / (1 + 0.2315419 * Math.abs(x));
+            var d = 0.3989423 * Math.exp( -x * x / 2);
+            var prob = d * t * (0.3193815 + t * ( -0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+            if( x > 0 ) {prob = 1 - prob};
+            return prob;
+        }
+
+        function calculatePentanomialLLR(LL, LD, DD, WD, WW, elo0, elo1) {
+            var total_pairs = LL + LD + DD + WD + WW;
+            var points = LL * 0 + LD * 0.25 + DD * 0.5 + WD * 0.75 + WW * 1;
+            var score = points / total_pairs;
+
+            var LL_ratio = LL / total_pairs;
+            var LD_ratio = LD / total_pairs;
+            var DD_ratio = DD / total_pairs;
+            var WD_ratio = WD / total_pairs;
+            var WW_ratio = WW / total_pairs;
+
+            var LL_dev = LL_ratio * Math.pow(0 - score, 2);
+            var LD_dev = LD_ratio * Math.pow(0.25 - score, 2);
+            var DD_dev = DD_ratio * Math.pow(0.5 - score, 2);
+            var WD_dev = WD_ratio * Math.pow(0.75 - score, 2);
+            var WW_dev = WW_ratio * Math.pow(1 - score, 2);
+            var variance = LL_dev + LD_dev + DD_dev + WD_dev + WW_dev;
+            var std_deviation = Math.sqrt(variance);
+
+            var score0 = nelo_to_score_penta(elo0, std_deviation);
+            var score1 = nelo_to_score_penta(elo1, std_deviation);
+
+            var LL_dev0 = LL_ratio * Math.pow(0 - score0, 2);
+            var LD_dev0 = LD_ratio * Math.pow(0.25 - score0, 2);
+            var DD_dev0 = DD_ratio * Math.pow(0.5 - score0, 2);
+            var WD_dev0 = WD_ratio * Math.pow(0.75 - score0, 2);
+            var WW_dev0 = WW_ratio * Math.pow(1 - score0, 2);
+            var variance0 = LL_dev0 + LD_dev0 + DD_dev0 + WD_dev0 + WW_dev0;
+
+            var LL_dev1 = LL_ratio * Math.pow(0 - score1, 2);
+            var LD_dev1 = LD_ratio * Math.pow(0.25 - score1, 2);
+            var DD_dev1 = DD_ratio * Math.pow(0.5 - score1, 2);
+            var WD_dev1 = WD_ratio * Math.pow(0.75 - score1, 2);
+            var WW_dev1 = WW_ratio * Math.pow(1 - score1, 2);
+            var variance1 = LL_dev1 + LD_dev1 + DD_dev1 + WD_dev1 + WW_dev1;
+
+            var llr = 0.5 * total_pairs * Math.log(variance0 / variance1);
+
+            return {
+                llr: llr,
+                score: score,
+                elo: score_to_elo(score),
+                ci: calculateEloWithCI(LL, LD, DD, WD, WW).ci,
+                nelo: score_to_nelo_penta(score, std_deviation),
+                variance: variance,
+                totalPairs: total_pairs,
+                los: (1 - ncdf(0, (score-0.5), (std_deviation / Math.sqrt(total_pairs))))*100
+            };
+        }
+
+        function calculateEloWithCI(LL, LD, DD, WD, WW) {
+            var total_pairs = LL + LD + DD + WD + WW;
+            var points = LL * 0 + LD * 0.25 + DD * 0.5 + WD * 0.75 + WW * 1;
+            var score = points / total_pairs;
+
+            var LL_ratio = LL / total_pairs;
+            var LD_ratio = LD / total_pairs;
+            var DD_ratio = DD / total_pairs;
+            var WD_ratio = WD / total_pairs;
+            var WW_ratio = WW / total_pairs;
+
+            var LL_dev = LL_ratio * Math.pow(0 - score, 2);
+            var LD_dev = LD_ratio * Math.pow(0.25 - score, 2);
+            var DD_dev = DD_ratio * Math.pow(0.5 - score, 2);
+            var WD_dev = WD_ratio * Math.pow(0.75 - score, 2);
+            var WW_dev = WW_ratio * Math.pow(1 - score, 2);
+            var variance = LL_dev + LD_dev + DD_dev + WD_dev + WW_dev;
+            var std_deviation = Math.sqrt(variance);
+
+            // 95% CI z-score
+            var zscore = 1.959963984540054;
+            var score_lower_bound = score - zscore * std_deviation / Math.sqrt(total_pairs);
+            var score_upper_bound = score + zscore * std_deviation / Math.sqrt(total_pairs);
+
+            var elo = score_to_elo(score);
+            var elo_lower_bound = score_to_elo(score_lower_bound);
+            var elo_upper_bound = score_to_elo(score_upper_bound);
+
+            var eloLower = Math.abs(elo - elo_lower_bound);
+            var eloUpper = Math.abs(elo_upper_bound - elo);
+            var ciMargin = Math.max(eloLower, eloUpper);
+
+            return {
+                elo: elo,
+                ci: ciMargin
+            };
+        }
+
+        // Global variables to store data and sort state (Architecture)
+        let archData = [];
+        let currentSort = { column: 'pentanomial', direction: 'desc' };
+
+        // Global variables to store data and sort state (Compiler)
+        let compilerData = [];
+        let currentCompilerSort = { column: 'pentanomial', direction: 'desc' };
+
+        // Global variables to store data and sort state (User)
+        let userData = [];
+        let currentUserSort = { column: 'pentanomial', direction: 'desc' };
+
+
+        // --- Architecture Table Functions ---
+
+        function renderTable(sortedData) {
+            const summaryTableBody = document.getElementById('summaryTableBody');
+            summaryTableBody.innerHTML = '';
+
+            // Bounds order: 0.5-2.5, 0-2, -1.75-0.25
+            const bounds = [
+                { elo0: 0.5, elo1: 2.5 },
+                { elo0: 0, elo1: 2 },
+                { elo0: -1.75, elo1: 0.25 }
+            ];
+
+            for (const item of sortedData) {
+                // Skip architectures with 0 pairs
+                const totalPairs = item.data.LL + item.data.LD + item.data.DD + item.data.WD + item.data.WW;
+                if (totalPairs === 0) continue;
+
+                const row = document.createElement('tr');
+
+                // Calculate LLR for each bound
+                let llrCells = '';
+                for (let i = 0; i < bounds.length; i++) {
+                    const bound = bounds[i];
+                    const llrResult = calculatePentanomialLLR(item.data.LL, item.data.LD, item.data.DD, item.data.WD, item.data.WW, bound.elo0, bound.elo1);
+
+                    let llrClass = 'neutral-llr';
+                    if (llrResult.llr > 0) llrClass = 'positive-llr';
+                    else if (llrResult.llr < 0) llrClass = 'negative-llr';
+
+                    llrCells += `<td class="px-4 py-3 whitespace-nowrap text-sm ${llrClass} font-medium">${llrResult.llr.toFixed(4)}</td>`;
+                }
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-100">${item.arch}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">[${item.data.LL}, ${item.data.LD}, ${item.data.DD}, ${item.data.WD}, ${item.data.WW}]</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-100">${item.eloData.elo.toFixed(2)} <span class="ci-gray">± ${item.eloData.ci.toFixed(2)}</span></td>
+                    ${llrCells}
+                `;
+
+                summaryTableBody.appendChild(row);
+            }
+        }
+
+        function sortTable(column) {
+            // Update sort direction
+            if (currentSort.column === column) {
+                currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.direction = 'desc';
+            }
+
+            // Update header classes
+            document.querySelectorAll('.sortable-header').forEach(header => {
+                header.classList.remove('sort-asc', 'sort-desc');
+                if (header.dataset.sort === column) {
+                    header.classList.add(currentSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                }
+            });
+
+            // Sort data
+            let sortedData = [...archData];
+
+            switch(column) {
+                case 'arch':
+                    sortedData.sort((a, b) => {
+                        const result = a.arch.localeCompare(b.arch);
+                        return currentSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+                case 'pentanomial':
+                    sortedData.sort((a, b) => {
+                        const totalA = a.data.LL + a.data.LD + a.data.DD + a.data.WD + a.data.WW;
+                        const totalB = b.data.LL + b.data.LD + b.data.DD + b.data.WD + b.data.WW;
+                        const result = totalA - totalB;
+                        return currentSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+                case 'elo':
+                    sortedData.sort((a, b) => {
+                        const result = a.eloData.elo - b.eloData.elo;
+                        return currentSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+                case 'llr1':
+                case 'llr2':
+                case 'llr3':
+                    // Mapping: llr1 = 0.5-2.5, llr2 = 0-2, llr3 = -1.75-0.25
+                    const bounds = [
+                        { elo0: 0.5, elo1: 2.5 },
+                        { elo0: 0, elo1: 2 },
+                        { elo0: -1.75, elo1: 0.25 }
+                    ];
+
+                    const boundIndex = column === 'llr1' ? 0 : column === 'llr2' ? 1 : 2;
+
+                    // Calculate LLR for all items
+                    sortedData.forEach(item => {
+                        const bound = bounds[boundIndex];
+                        const llrResult = calculatePentanomialLLR(item.data.LL, item.data.LD, item.data.DD, item.data.WD, item.data.WW, bound.elo0, bound.elo1);
+                        item.llrValue = llrResult.llr;
+                    });
+
+                    sortedData.sort((a, b) => {
+                        const result = a.llrValue - b.llrValue;
+                        return currentSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+            }
+
+            renderTable(sortedData);
+        }
+
+        // --- Compiler Table Functions ---
+
+        function renderCompilerTable(sortedData) {
+            const summaryTableBody = document.getElementById('compilerSummaryTableBody');
+            summaryTableBody.innerHTML = '';
+
+            // Bounds order: 0.5-2.5, 0-2, -1.75-0.25
+            const bounds = [
+                { elo0: 0.5, elo1: 2.5 },
+                { elo0: 0, elo1: 2 },
+                { elo0: -1.75, elo1: 0.25 }
+            ];
+
+            for (const item of sortedData) {
+                // Skip compilers with 0 pairs
+                const totalPairs = item.data.LL + item.data.LD + item.data.DD + item.data.WD + item.data.WW;
+                if (totalPairs === 0) continue;
+
+                const row = document.createElement('tr');
+
+                // Calculate LLR for each bound
+                let llrCells = '';
+                for (let i = 0; i < bounds.length; i++) {
+                    const bound = bounds[i];
+                    const llrResult = calculatePentanomialLLR(item.data.LL, item.data.LD, item.data.DD, item.data.WD, item.data.WW, bound.elo0, bound.elo1);
+
+                    let llrClass = 'neutral-llr';
+                    if (llrResult.llr > 0) llrClass = 'positive-llr';
+                    else if (llrResult.llr < 0) llrClass = 'negative-llr';
+
+                    llrCells += `<td class="px-4 py-3 whitespace-nowrap text-sm ${llrClass} font-medium">${llrResult.llr.toFixed(4)}</td>`;
+                }
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-100">${item.compiler}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">[${item.data.LL}, ${item.data.LD}, ${item.data.DD}, ${item.data.WD}, ${item.data.WW}]</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-100">${item.eloData.elo.toFixed(2)} <span class="ci-gray">± ${item.eloData.ci.toFixed(2)}</span></td>
+                    ${llrCells}
+                `;
+
+                summaryTableBody.appendChild(row);
+            }
+        }
+
+        function sortCompilerTable(column) {
+            // Update sort direction
+            if (currentCompilerSort.column === column) {
+                currentCompilerSort.direction = currentCompilerSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentCompilerSort.column = column;
+                currentCompilerSort.direction = 'desc';
+            }
+
+            // Update header classes
+            document.querySelectorAll('.sortable-header-compiler').forEach(header => {
+                header.classList.remove('sort-asc', 'sort-desc');
+                if (header.dataset.sort === column) {
+                    header.classList.add(currentCompilerSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                }
+            });
+
+            // Sort data
+            let sortedData = [...compilerData];
+
+            switch(column) {
+                case 'compiler':
+                    sortedData.sort((a, b) => {
+                        const result = a.compiler.localeCompare(b.compiler);
+                        return currentCompilerSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+                case 'pentanomial':
+                    sortedData.sort((a, b) => {
+                        const totalA = a.data.LL + a.data.LD + a.data.DD + a.data.WD + a.data.WW;
+                        const totalB = b.data.LL + b.data.LD + b.data.DD + b.data.WD + b.data.WW;
+                        const result = totalA - totalB;
+                        return currentCompilerSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+                case 'elo':
+                    sortedData.sort((a, b) => {
+                        const result = a.eloData.elo - b.eloData.elo;
+                        return currentCompilerSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+                case 'llr1':
+                case 'llr2':
+                case 'llr3':
+                    const bounds = [
+                        { elo0: 0.5, elo1: 2.5 },
+                        { elo0: 0, elo1: 2 },
+                        { elo0: -1.75, elo1: 0.25 }
+                    ];
+
+                    const boundIndex = column === 'llr1' ? 0 : column === 'llr2' ? 1 : 2;
+
+                    sortedData.forEach(item => {
+                        const bound = bounds[boundIndex];
+                        const llrResult = calculatePentanomialLLR(item.data.LL, item.data.LD, item.data.DD, item.data.WD, item.data.WW, bound.elo0, bound.elo1);
+                        item.llrValue = llrResult.llr;
+                    });
+
+                    sortedData.sort((a, b) => {
+                        const result = a.llrValue - b.llrValue;
+                        return currentCompilerSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+            }
+
+            renderCompilerTable(sortedData);
+        }
+
+        // --- User Table Functions ---
+
+        function renderUserTable(sortedData) {
+            const summaryTableBody = document.getElementById('userSummaryTableBody');
+            summaryTableBody.innerHTML = '';
+
+            // Bounds order: 0.5-2.5, 0-2, -1.75-0.25
+            const bounds = [
+                { elo0: 0.5, elo1: 2.5 },
+                { elo0: 0, elo1: 2 },
+                { elo0: -1.75, elo1: 0.25 }
+            ];
+
+            for (const item of sortedData) {
+                const totalPairs = item.data.LL + item.data.LD + item.data.DD + item.data.WD + item.data.WW;
+                if (totalPairs === 0) continue;
+
+                const row = document.createElement('tr');
+
+                // Calculate LLR for each bound
+                let llrCells = '';
+                for (let i = 0; i < bounds.length; i++) {
+                    const bound = bounds[i];
+                    const llrResult = calculatePentanomialLLR(item.data.LL, item.data.LD, item.data.DD, item.data.WD, item.data.WW, bound.elo0, bound.elo1);
+
+                    let llrClass = 'neutral-llr';
+                    if (llrResult.llr > 0) llrClass = 'positive-llr';
+                    else if (llrResult.llr < 0) llrClass = 'negative-llr';
+
+                    llrCells += `<td class="px-4 py-3 whitespace-nowrap text-sm ${llrClass} font-medium">${llrResult.llr.toFixed(4)}</td>`;
+                }
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-100">${item.user}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">[${item.data.LL}, ${item.data.LD}, ${item.data.DD}, ${item.data.WD}, ${item.data.WW}]</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-100">${item.eloData.elo.toFixed(2)} <span class="ci-gray">± ${item.eloData.ci.toFixed(2)}</span></td>
+                    ${llrCells}
+                `;
+
+                summaryTableBody.appendChild(row);
+            }
+        }
+
+        function sortUserTable(column) {
+            // Update sort direction
+            if (currentUserSort.column === column) {
+                currentUserSort.direction = currentUserSort.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentUserSort.column = column;
+                currentUserSort.direction = 'desc';
+            }
+
+            // Update header classes
+            document.querySelectorAll('.sortable-header-user').forEach(header => {
+                header.classList.remove('sort-asc', 'sort-desc');
+                if (header.dataset.sort === column) {
+                    header.classList.add(currentUserSort.direction === 'asc' ? 'sort-asc' : 'sort-desc');
+                }
+            });
+
+            // Sort data
+            let sortedData = [...userData];
+
+            switch(column) {
+                case 'user':
+                    sortedData.sort((a, b) => {
+                        const result = a.user.localeCompare(b.user);
+                        return currentUserSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+                case 'pentanomial':
+                    sortedData.sort((a, b) => {
+                        const totalA = a.data.LL + a.data.LD + a.data.DD + a.data.WD + a.data.WW;
+                        const totalB = b.data.LL + b.data.LD + b.data.DD + b.data.WD + b.data.WW;
+                        const result = totalA - totalB;
+                        return currentUserSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+                case 'elo':
+                    sortedData.sort((a, b) => {
+                        const result = a.eloData.elo - b.eloData.elo;
+                        return currentUserSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+                case 'llr1':
+                case 'llr2':
+                case 'llr3':
+                    const bounds = [
+                        { elo0: 0.5, elo1: 2.5 },
+                        { elo0: 0, elo1: 2 },
+                        { elo0: -1.75, elo1: 0.25 }
+                    ];
+
+                    const boundIndex = column === 'llr1' ? 0 : column === 'llr2' ? 1 : 2;
+
+                    sortedData.forEach(item => {
+                        const bound = bounds[boundIndex];
+                        const llrResult = calculatePentanomialLLR(item.data.LL, item.data.LD, item.data.DD, item.data.WD, item.data.WW, bound.elo0, bound.elo1);
+                        item.llrValue = llrResult.llr;
+                    });
+
+                    sortedData.sort((a, b) => {
+                        const result = a.llrValue - b.llrValue;
+                        return currentUserSort.direction === 'asc' ? result : -result;
+                    });
+                    break;
+            }
+
+            renderUserTable(sortedData);
+        }
+
+        // --- Event Handler ---
+
+        document.getElementById('analyzeBtn').addEventListener('click', function() {
+            const inputData = document.getElementById('inputData').value;
+
+            if (!inputData.trim()) {
+                alert('Please input some data to analyze.');
+                return;
+            }
+
+            // Regex for Architecture results (from existing summary lines)
+            const archRegex = /arch: (.*?) \d{4}-.*? \/ \d+ \[(\d+), (\d+), (\d+), (\d+), (\d+)\]/g;
+
+            // Regex for Compiler results (from detailed log lines, capturing compiler and scores)
+            const compilerRegex = /compiler: (.*?)\..*?;.*?\[(\d+), (\d+), (\d+), (\d+), (\d+)\]/g;
+
+            // Regex for User results (capturing user name and scores)
+            const userRegex = /\d+ (\w+)-\d+cores.*?\[(\d+), (\d+), (\d+), (\d+), (\d+)\]/g;
+
+
+            const archResults = {};
+            const compilerResults = {};
+            const userResults = {};
+            let match;
+
+            // 1. ARCHITECTURE EXTRACTION
+            // Reset regex pointer for reuse
+            archRegex.lastIndex = 0;
+            while ((match = archRegex.exec(inputData)) !== null) {
+                const arch = match[1].trim();
+                const [LL, LD, DD, WD, WW] = match.slice(2, 7).map(Number);
+
+                if (!archResults[arch]) {
+                    archResults[arch] = { LL: 0, LD: 0, DD: 0, WD: 0, WW: 0, count: 0 };
+                }
+
+                archResults[arch].LL += LL;
+                archResults[arch].LD += LD;
+                archResults[arch].DD += DD;
+                archResults[arch].WD += WD;
+                archResults[arch].WW += WW;
+                archResults[arch].count++;
+            }
+
+            // 2. COMPILER EXTRACTION
+            compilerRegex.lastIndex = 0;
+            while ((match = compilerRegex.exec(inputData)) !== null) {
+                const compiler = match[1].trim();
+                const [LL, LD, DD, WD, WW] = match.slice(2, 7).map(Number);
+
+                if (!compilerResults[compiler]) {
+                    compilerResults[compiler] = { LL: 0, LD: 0, DD: 0, WD: 0, WW: 0, count: 0 };
+                }
+
+                compilerResults[compiler].LL += LL;
+                compilerResults[compiler].LD += LD;
+                compilerResults[compiler].DD += DD;
+                compilerResults[compiler].WD += WD;
+                compilerResults[compiler].WW += WW;
+                compilerResults[compiler].count++;
+            }
+
+            // 3. USER EXTRACTION
+            userRegex.lastIndex = 0;
+            while ((match = userRegex.exec(inputData)) !== null) {
+                // match[1] is the (\w+) part (username)
+                const user = match[1].trim();
+                const [LL, LD, DD, WD, WW] = match.slice(2, 7).map(Number);
+
+                if (!userResults[user]) {
+                    userResults[user] = { LL: 0, LD: 0, DD: 0, WD: 0, WW: 0, count: 0 };
+                }
+
+                userResults[user].LL += LL;
+                userResults[user].LD += LD;
+                userResults[user].DD += DD;
+                userResults[user].WD += WD;
+                userResults[user].WW += WW;
+                userResults[user].count++;
+            }
+
+            // --- Overall Summary Calculations (Using combined results for overall stats) ---
+            const totalResults = Object.values(archResults).reduce((acc, data) => {
+                acc.LL += data.LL;
+                acc.LD += data.LD;
+                acc.DD += data.DD;
+                acc.WD += data.WD;
+                acc.WW += data.WW;
+                acc.count += data.count;
+                return acc;
+            }, { LL: 0, LD: 0, DD: 0, WD: 0, WW: 0, count: 0 });
+
+            const totalResult = calculatePentanomialLLR(totalResults.LL, totalResults.LD, totalResults.DD, totalResults.WD, totalResults.WW, 0, 2);
+
+            // Bounds order: 0.5-2.5, 0-2, -1.75-0.25
+            const bounds = [
+                { elo0: 0.5, elo1: 2.5, name: "0.5-2.5" },
+                { elo0: 0, elo1: 2, name: "0-2" },
+                { elo0: -1.75, elo1: 0.25, name: "-1.75-0.25" }
+            ];
+
+            // Create Overall LLR results HTML
+            let overallLLRResults = '';
+            for (const bound of bounds) {
+                const llrResult = calculatePentanomialLLR(totalResults.LL, totalResults.LD, totalResults.DD, totalResults.WD, totalResults.WW, bound.elo0, bound.elo1);
+
+                let llrClass = 'neutral-llr';
+                if (llrResult.llr > 0) llrClass = 'positive-llr';
+                else if (llrResult.llr < 0) llrClass = 'negative-llr';
+
+                overallLLRResults += `
+                    <div class="flex justify-between gap-2">
+                        <span class="text-gray-400">Bounds ${bound.name}:</span>
+                        <span class="text-sm ${llrClass}">LLR: ${llrResult.llr.toFixed(4)}</span>
+                    </div>
+                `;
+            }
+
+            // Find most common architecture
+            const mostCommonArch = Object.entries(archResults).reduce((most, [arch, data]) => {
+                return data.count > most.count ? { arch, count: data.count } : most;
+            }, { arch: 'None', count: 0 });
+
+            // Define summaryStatsDiv before using it
+            const summaryStatsDiv = document.getElementById('summaryStats');
+            summaryStatsDiv.innerHTML = `
+                <div class="bg-blue-900/20 rounded p-4">
+                    <h3 class="font-semibold text-gray-100 mb-2">Overall Statistics</h3>
+                    <div class="text-sm space-y-1">
+                        <div class="flex justify-between gap-2">
+                            <span class="text-gray-400">Total Tasks:</span>
+                            <span class="font-medium text-gray-100">${totalResults.count}</span>
+                        </div>
+                        <div class="flex justify-between gap-2">
+                            <span class="text-gray-400">Total Score:</span>
+                            <span class="font-medium text-gray-100">${(totalResult.score * 100).toFixed(2)}%</span>
+                        </div>
+                        <div class="flex justify-between gap-2">
+                            <span class="text-gray-400">Overall Elo:</span>
+                            <span class="font-medium text-gray-100">${totalResult.elo.toFixed(2)} <span class="ci-gray">± ${totalResult.ci.toFixed(2)}</span></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-purple-900/20 rounded p-4">
+                    <h3 class="font-semibold text-gray-100 mb-2">Most Common Arch</h3>
+                    <div class="text-sm space-y-1">
+                        <div class="flex justify-between gap-2">
+                            <span class="text-gray-400">Architecture:</span>
+                            <span class="font-medium text-gray-100">${mostCommonArch.arch}</span>
+                        </div>
+                        <div class="flex justify-between gap-2">
+                            <span class="text-gray-400">Task count:</span>
+                            <span class="font-medium text-gray-100">${mostCommonArch.count}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-green-900/20 rounded p-4">
+                    <h3 class="font-semibold text-gray-100 mb-2">Overall LLR Results</h3>
+                    <div class="text-sm space-y-1">
+                        ${overallLLRResults}
+                    </div>
+                </div>
+            `;
+
+            // 4. PREPARE ARCHITECTURE DATA
+            archData = [];
+            for (const [arch, data] of Object.entries(archResults)) {
+                const totalPairs = data.LL + data.LD + data.DD + data.WD + data.WW;
+                if (totalPairs === 0) continue;
+
+                const eloWithCI = calculateEloWithCI(data.LL, data.LD, data.DD, data.WD, data.WW);
+
+                archData.push({
+                    arch: arch,
+                    data: data,
+                    eloData: {
+                        elo: eloWithCI.elo,
+                        ci: eloWithCI.ci
+                    }
+                });
+            }
+
+            // 5. PREPARE COMPILER DATA
+            compilerData = [];
+            for (const [compiler, data] of Object.entries(compilerResults)) {
+                const totalPairs = data.LL + data.LD + data.DD + data.WD + data.WW;
+                if (totalPairs === 0) continue;
+
+                const eloWithCI = calculateEloWithCI(data.LL, data.LD, data.DD, data.WD, data.WW);
+
+                compilerData.push({
+                    compiler: compiler,
+                    data: data,
+                    eloData: {
+                        elo: eloWithCI.elo,
+                        ci: eloWithCI.ci
+                    }
+                });
+            }
+
+            // 6. PREPARE USER DATA
+            userData = [];
+            for (const [user, data] of Object.entries(userResults)) {
+                const totalPairs = data.LL + data.LD + data.DD + data.WD + data.WW;
+                if (totalPairs === 0) continue;
+
+                const eloWithCI = calculateEloWithCI(data.LL, data.LD, data.DD, data.WD, data.WW);
+
+                userData.push({
+                    user: user,
+                    data: data,
+                    eloData: {
+                        elo: eloWithCI.elo,
+                        ci: eloWithCI.ci
+                    }
+                });
+            }
+
+
+            // 7. SETUP AND RENDER ARCHITECTURE TABLE
+            // Reset to default sort for new analysis: Pentanomial Descending
+            // We set to empty so the first sortTable call sees it as a "new" column and sets desc
+            currentSort = { column: '', direction: '' };
+
+            document.querySelectorAll('.sortable-header').forEach(header => {
+                // Remove existing listeners before adding new ones
+                header.replaceWith(header.cloneNode(true));
+            });
+            document.querySelectorAll('.sortable-header').forEach(header => {
+                header.addEventListener('click', function() {
+                    sortTable(this.dataset.sort);
+                });
+            });
+
+            sortTable('pentanomial');
+
+            // 8. SETUP AND RENDER COMPILER TABLE
+            currentCompilerSort = { column: '', direction: '' };
+
+            document.querySelectorAll('.sortable-header-compiler').forEach(header => {
+                // Remove existing listeners before adding new ones
+                header.replaceWith(header.cloneNode(true));
+            });
+            document.querySelectorAll('.sortable-header-compiler').forEach(header => {
+                header.addEventListener('click', function() {
+                    sortCompilerTable(this.dataset.sort);
+                });
+            });
+
+            sortCompilerTable('pentanomial');
+
+            // 9. SETUP AND RENDER USER TABLE
+            currentUserSort = { column: '', direction: '' };
+
+            document.querySelectorAll('.sortable-header-user').forEach(header => {
+                // Remove existing listeners before adding new ones
+                header.replaceWith(header.cloneNode(true));
+            });
+            document.querySelectorAll('.sortable-header-user').forEach(header => {
+                header.addEventListener('click', function() {
+                    sortUserTable(this.dataset.sort);
+                });
+            });
+
+            sortUserTable('pentanomial');
+
+            // Show the results section
+            document.getElementById('results').classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
