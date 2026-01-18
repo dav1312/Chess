@@ -10,6 +10,12 @@ An example of a dynamic evaluation bar.
 
 ---
 
+[https://dav1312.github.io/Chess/FishtestGroupTest](https://dav1312.github.io/Chess/FishtestGroupTest)
+
+Group Fishtest tests by worker architecture.
+
+---
+
 [https://dav1312.github.io/Chess/StockfishCommits](https://dav1312.github.io/Chess/StockfishCommits)
 
 See all of the Stockfish commits and download the latest version.
