@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Generate a reusable Lichess challenge link with your custom settings to share with any opponent.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lichess Challenge Link Creator</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'media',
+            theme: {
+                extend: {
+                    colors: {
+                        lichess: {
+                            bg: '#f5f5f5',
+                            'dark-bg': '#161512',
+                            card: '#ffffff',
+                            'dark-card': '#262421',
+                            text: '#333333',
+                            'dark-text': '#bababa',
+                            secondary: '#666666',
+                            'dark-secondary': '#8c8c8c',
+                            border: '#e0e0e0',
+                            'dark-border': '#383838',
+                            accent: '#3692e7',
+                            'accent-hover': '#2d7bc2',
+                            'accent-hover-dark': '#4aa0ec',
+                            input: '#ffffff',
+                            'dark-input': '#302e2c',
+                            success: '#629924'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        /* Dynamic state classes toggled by JS */
+        .toggle-option.active {
+            @apply bg-lichess-accent text-white font-medium;
+        }
+
+        .color-btn.selected {
+            @apply border-lichess-accent scale-110 shadow-[0_0_0_2px_#3692e7];
+        }
+
+        .toast.show {
+            @apply opacity-100;
+        }
+
+        /* Custom Gradient for Random Color */
+        .color-random {
+            background: linear-gradient(90deg, #f0f0f0 50%, #333 50%);
+        }
+
+        /* Patron Icon Mask */
+        .patron-icon {
+            --wing: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjEwbW0iIGhlaWdodD0iMjk3bW0iIHZpZXdCb3g9IjAgMCAyMTAgMjk3IiB2ZXJzaW9uPSIxLjEiIGlkPSJzdmc1IiB4bWw6c3BhY2U9InByZXNlcnZlIiBpbmtzY2FwZTp2ZXJzaW9uPSIxLjQuMiAoZWJmMGU5NDBkMCwgMjAyNS0wNS0wOCkiIHNvZGlwb2RpOmRvY25hbWU9IndpbmczLnN2ZyIgeG1sbnM6aW5rc2NhcGU9Imh0dHA6Ly93d3cuaW5rc2NhcGUub3JnL25hbWVzcGFjZXMvaW5rc2NhcGUiIHhtbG5zOnNvZGlwb2RpPSJodHRwOi8vc29kaXBvZGkuc291cmNlZm9yZ2UubmV0L0RURC9zb2RpcG9kaS0wLmR0ZCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48c29kaXBvZGk6bmFtZWR2aWV3IGlkPSJuYW1lZHZpZXc3IiBwYWdlY29sb3I9IiNmZmZmZmYiIGJvcmRlcmNvbG9yPSIjMDAwMDAwIiBib3JkZXJvcGFjaXR5PSIwLjI1IiBpbmtzY2FwZTpzaG93cGFnZXNoYWRvdz0iMiIgaW5rc2NhcGU6cGFnZW9wYWNpdHk9IjAuMCIgaW5rc2NhcGU6cGFnZWNoZWNrZXJib2FyZD0iMCIgaW5rc2NhcGU6ZGVza2NvbG9yPSIjZDFkMWQxIiBpbmtzY2FwZTpkb2N1bWVudC11bml0cz0ibW0iIHNob3dncmlkPSJmYWxzZSIgaW5rc2NhcGU6em9vbT0iMS40MTQyMTM2IiBpbmtzY2FwZTpjeD0iMzY4LjQwMjYzIiBpbmtzY2FwZTpjeT0iNTY2LjAzODk4IiBpbmtzY2FwZTp3aW5kb3ctd2lkdGg9IjM4NDAiIGlua3NjYXBlOndpbmRvdy1oZWlnaHQ9IjIxMTgiIGlua3NjYXBlOndpbmRvdy14PSIwIiBpbmtzY2FwZTp3aW5kb3cteT0iMCIgaW5rc2NhcGU6d2luZG93LW1heGltaXplZD0iMCIgaW5rc2NhcGU6Y3VycmVudC1sYXllcj0ibGF5ZXIxIi8+PGRlZnMgaWQ9ImRlZnMyIi8+PGcgaW5rc2NhcGU6bGFiZWw9IkxheWVyIDEiIGlua3NjYXBlOmdyb3VwbW9kZT0ibGF5ZXIiIGlkPSJsYXllcjEiPjxwYXRoIHN0eWxlPSJkaXNwbGF5OmlubGluZTtmaWxsOiMwMDA7c3Ryb2tlLXdpZHRoOi40MTEyNDIiIGQ9Im0gMTk2LjYzNzAzLDIxNi4wODkzOCBjIDAuNzc3ODEsLTMuNjUxMTkgMS4wMjQ2NCwtNS40Nzk3NSAxLjQzMTg5LC0xMC42MDgzIDAuNDkwOSwtNi4xODIwMiAwLjI3OTQsLTEyLjc0NTA5IC0wLjY0NDc2LC0yMC4wMDczIEMgMTk0LjM1NywxNjEuMzcxNTMgMTgxLjcwMjQzLDE0MS4yMjQ2OCAxNjAuMTMzNzgsMTI2LjEwNTIyIDE0OS4wNzMwNCwxMTguMzUxNzIgMTM4LjU0NDEyLDExMy4xOTEgMTE1Ljg5Nzk2LDEwNC40MjMxNiA3NS40Mjg2NDIsODguNzU0Nzg2IDYwLjYwNDU3Nyw4MS40OTU0OTEgNDIuNDc2MDg3LDY4LjQ2ODcyNCAzNC40NDMzNjIsNjIuNjk2NTcgMjguODMyMTQ3LDU3LjgzNzQ0IDIyLjE5MTgyNyw1MC45MDMyNDcgYyAtMi45NzM3OTUsLTMuMTA1NDA1IC01LjUxOTk4NSwtNS42NDYxOTUgLTUuNjU4MTk1LC01LjY0NjE5NSAtMC41MDA3NDUsMCAtMC4yMzYyNjUsMTIuNDQ1OTA1IDAuMzY0MTg1LDE3LjEzNjk4OSAyLjYwNDg4NSwyMC4zNTE1MDUgMTAuNjU1ODk1LDM1LjE4NDI4NSAyMS41MDg1Myw0OC4zMDQyNTkgOC4wOTA0OSw5Ljc4MDc4IDIxLjgwMDY0NCwxOS4wMzY1MiA0My43NTcyNDIsMjguNTU4MzggNy42Nzk2OTcsMy4zMzA0NCAxNi4xMzUwMzUsNi42MjEyMyAzNi4xMTU2MjEsMTIuMDU2ODggMjAuMDE0MjYsNS40NDQ4MSAyNC4wODUxNSw2LjkzNTMxIDM0LjUyODEyLDEyLjY0MjA2IDE0LjAxMDk5LDcuNjU2NTYgMjQuNjg2NjMsMTcuOTcwMiAzMy42MDY0MSwzMi40NjY4NyAyLjk0NzcyLDQuNzkwNzIgNi43MjkxMywxMi41NTM0MSA4LjQ2MDQ2LDE3LjM2ODEgMS4xMzMxNSwzLjE1MTE3IDEuNDgzODMsMy42MDg0NyAxLjc2MjgzLDIuMjk4NzkgeiIgaWQ9InBhdGgzMTczIiBpbmtzY2FwZTpsYWJlbD0iYm90dG9tIiBzb2RpcG9kaTpub2RldHlwZXM9InNzc3Nzc3NzY3Nzc3Nzc3MiLz48cGF0aCBzdHlsZT0iZGlzcGxheTppbmxpbmU7ZmlsbDojMDAwO3N0cm9rZS13aWR0aDouNDExMjQyIiBkPSJtIDEyNC4yODQxMywyMjkuNTg2NDEgYyA0LjQ0NzAzLC0wLjc4MTU2IDcuMDAzODEsLTEuNDkxNzMgMTUuNDI2MzMsLTQuMjg0ODIgNy45ODg0NCwtMi42NDkxNSAxMy44NjE5MiwtNC4yMDM5MiAxOC42MDA5OSwtNC45MjM4NCA0LjAyNDUsLTAuNjExMzcgMTEuMzc1MzEsLTAuMjg5OTggMTUuNTMwMjYsMC42NzkgMy43ODY2NSwwLjg4MzEgMTAuMDA1MDMsMy41Mzg2NSAxMy40MDMzNCw1LjcyMzg4IDEuNDQ5MzIsMC45MzE5NyAyLjY4NzcsMS42MzgwMiAyLjc1MTk4LDEuNTY5IDAuMjQ0NjksLTAuMjYyNzIgLTMuMTQxNTYsLTguNjcxNjUgLTQuODkxMjMsLTEyLjE0NjE3IC00LjY1NDk1LC05LjI0Mzg2IC04LjQ2MjY2LC0xNC44OTk2MiAtMTQuNjI5MDQsLTIxLjcyOTE1IC02Ljk2MjA0LC03LjcxMDc3IC0xMy4wMzkyLC0xMi40NDc5OCAtMjIuNDMxOTMsLTE3LjQ4NTk0IC0xMS4xMDc3MiwtNS45NTc4MiAtMTguMDI0NTIsLTguMTEwMjEgLTQ0LjY0ODQzLC0xMy44OTM3OSAtMzYuNzg0MjMzLC03Ljk5MDcgLTUxLjE4ODE2MywtMTMuODA2MTEgLTcwLjEzMTYzMywtMjguMzE0NzUgLTAuNzgwMjg1LC0wLjU5NzYyIC0wLjc5OTE3LC0wLjU2NzA4IC0wLjUyNzA0LDAuODUyMjcgMS4zOTMxNyw3LjI2NjM5IDYuMzYyNjg1LDE5LjU1NjM0IDExLjUyNDkyLDI4LjUwMTgzIDguNDM2NzUsMTQuNjE5ODQgMTkuNjgwMTYzLDIyLjY4ODYxIDMxLjY5NDI5MywyNi4yMTEyNSA4LjAyNDcsMi4zNTI5IDI1LjkyMTAzLDUuMTIzNiAzMi42NDc5Niw1LjQ3MzI4IGwgMjguNjg0NjgsMi41ODQ0NCAtMy44Nzc1NiwyLjU2NjA2IGMgLTIuNjM1NjgsMS43NDQyMyAtMTAuNzEyMTIsNC44MjEwOSAtMTUuNTg3MzksNS43NDIzOCAtMTUuNDc1MjYsMi45MjQzOCAtMjEuODE0NTI5LDAuNDAzOTIgLTMzLjAyODc3MywtMC4xNTM5MyBsIC01LjkwMDUzNSwtMC4yOTM1MiAxLjMyMDg4NSwyLjA2NzEzIGMgMS44OTI4NSwyLjk2MjI1IDcuOTU2NTQsOS41ODE1NSAxMS4yNDI5MDUsMTIuMjczMDkgNC45OTMxMTcsNC4wODkzNiAxMS4yNzUwNTgsNy4yNTU5NyAxNy4wNTA4NDgsOC41OTUwMiA0LjAxMjcxLDAuOTMwMyAxMS42MjE1NSwxLjExNzEyIDE1Ljc3NDE3LDAuMzg3MjggeiIgaWQ9InBhdGgxIiBpbmtzY2FwZTpsYWJlbD0idG9wIiBzb2RpcG9kaTpub2RldHlwZXM9InNzc3Nzc3Nzc3Nzc3Nzc2Nzc3Njc3NzcyIvPjwvZz48L3N2Zz4=");
+            display: inline-block;
+            margin: -3px;
+            width: 30px;
+            height: 26px;
+            mask-image: var(--wing);
+            mask-size: contain;
+            mask-repeat: no-repeat;
+            mask-position: center;
+            -webkit-mask-image: var(--wing);
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+        }
+
+        /* Utility overrides */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-lichess-bg dark:bg-lichess-dark-bg text-lichess-text dark:text-lichess-dark-text flex justify-center items-center min-h-screen transition-colors duration-300 p-5 font-sans">
+
+<div class="bg-lichess-card dark:bg-lichess-dark-card w-full max-w-[500px] p-8 rounded-lg shadow-lg">
+    <h1 class="text-2xl mb-6 text-center font-light">Create Lichess Challenge Link</h1>
+    <p class="text-sm text-center text-lichess-secondary dark:text-lichess-dark-secondary mb-6">
+        Generate a reusable challenge link with your custom settings to share with any opponent.
+    </p>
+
+    <!-- Opponent -->
+    <div class="mb-5 relative">
+        <label for="username" class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Username</label>
+        <input type="text" id="username" placeholder="Search player..." autocomplete="off"
+               class="w-full p-2.5 rounded border border-lichess-border dark:border-lichess-dark-border bg-lichess-input dark:bg-lichess-dark-input text-lichess-text dark:text-lichess-dark-text text-base outline-none transition-colors focus:border-lichess-accent">
+        <div id="autocomplete-list" class="absolute top-full left-0 right-0 bg-lichess-card dark:bg-lichess-dark-card border border-lichess-border dark:border-lichess-dark-border border-t-0 rounded-b max-h-[200px] overflow-y-auto z-10 shadow-md hidden"></div>
+    </div>
+
+    <!-- Variant -->
+    <div class="mb-5 relative">
+        <label for="variant" class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Variant</label>
+        <select id="variant" class="w-full p-2.5 rounded border border-lichess-border dark:border-lichess-dark-border bg-lichess-input dark:bg-lichess-dark-input text-lichess-text dark:text-lichess-dark-text text-base outline-none transition-colors focus:border-lichess-accent">
+            <option value="any">Any</option>
+            <option value="standard">Standard</option>
+            <option value="crazyhouse">Crazyhouse</option>
+            <option value="chess960">Chess960</option>
+            <option value="kingOfTheHill">King of the Hill</option>
+            <option value="threeCheck">Three-check</option>
+            <option value="antichess">Antichess</option>
+            <option value="atomic">Atomic</option>
+            <option value="horde">Horde</option>
+            <option value="racingKings">Racing Kings</option>
+            <option value="fromPosition">From Position (FEN)</option>
+        </select>
+    </div>
+
+    <!-- FEN (Hidden by default) -->
+    <div class="mb-5 relative hidden" id="fen-group">
+        <label for="fen" class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">FEN String</label>
+        <input type="text" id="fen" placeholder="rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+               class="w-full p-2.5 rounded border border-lichess-border dark:border-lichess-dark-border bg-lichess-input dark:bg-lichess-dark-input text-lichess-text dark:text-lichess-dark-text text-base outline-none transition-colors focus:border-lichess-accent">
+    </div>
+
+    <!-- Mode (Casual/Rated) -->
+    <div class="mb-5 relative">
+        <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Mode</label>
+        <div class="flex flex-wrap gap-2.5 bg-lichess-input dark:bg-lichess-dark-input p-1 rounded-md border border-lichess-border dark:border-lichess-dark-border" id="mode-toggle">
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none active" data-mode="any" onclick="setMode('any', this)">Any</div>
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none" data-mode="casual" onclick="setMode('casual', this)">Casual</div>
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none" data-mode="rated" onclick="setMode('rated', this)">Rated</div>
+        </div>
+    </div>
+
+    <!-- Time Control Type -->
+    <div class="mb-5 relative">
+        <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Time Control</label>
+        <div class="flex flex-wrap gap-2.5 bg-lichess-input dark:bg-lichess-dark-input p-1 rounded-md border border-lichess-border dark:border-lichess-dark-border">
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none active" onclick="setTimeType('any', this)">Any</div>
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none" onclick="setTimeType('realTime', this)">Real Time</div>
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none" onclick="setTimeType('correspondence', this)">Correspondence</div>
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none" onclick="setTimeType('unlimited', this)">Unlimited</div>
+        </div>
+    </div>
+
+    <!-- Time Inputs: Real Time -->
+    <div id="realtime-inputs" class="mb-5 relative hidden">
+        <div class="flex gap-2.5">
+            <div class="flex-1">
+                <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Minutes</label>
+                <input type="number" id="minutes" value="10" min="0" max="180"
+                       class="w-full p-2.5 rounded border border-lichess-border dark:border-lichess-dark-border bg-lichess-input dark:bg-lichess-dark-input text-lichess-text dark:text-lichess-dark-text text-base outline-none transition-colors focus:border-lichess-accent">
+            </div>
+            <div class="flex-1">
+                <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Increment (sec)</label>
+                <input type="number" id="increment" value="0" min="0" max="180"
+                       class="w-full p-2.5 rounded border border-lichess-border dark:border-lichess-dark-border bg-lichess-input dark:bg-lichess-dark-input text-lichess-text dark:text-lichess-dark-text text-base outline-none transition-colors focus:border-lichess-accent">
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Inputs: Correspondence -->
+    <div id="correspondence-inputs" class="mb-5 relative hidden">
+        <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Days per turn</label>
+        <input type="number" id="days" value="1" min="1" max="14"
+               class="w-full p-2.5 rounded border border-lichess-border dark:border-lichess-dark-border bg-lichess-input dark:bg-lichess-dark-input text-lichess-text dark:text-lichess-dark-text text-base outline-none transition-colors focus:border-lichess-accent">
+    </div>
+
+    <!-- Color -->
+    <div class="mb-5 relative">
+        <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Color</label>
+        <div class="flex justify-center gap-4 mt-2">
+            <div class="color-btn w-10 h-10 rounded-full border-2 border-lichess-border dark:border-lichess-dark-border cursor-pointer relative transition-transform bg-[#333]" onclick="setColor('black', this)" title="Black"></div>
+            <div class="color-btn color-random w-10 h-10 rounded-full border-2 border-lichess-border dark:border-lichess-dark-border cursor-pointer relative transition-transform selected" onclick="setColor('random', this)" title="Random"></div>
+            <div class="color-btn w-10 h-10 rounded-full border-2 border-lichess-border dark:border-lichess-dark-border cursor-pointer relative transition-transform bg-[#f0f0f0]" onclick="setColor('white', this)" title="White"></div>
+        </div>
+    </div>
+
+    <!-- Result -->
+    <div class="mt-8">
+        <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Challenge Link</label>
+        <div class="flex bg-lichess-input dark:bg-lichess-dark-input border border-lichess-border dark:border-lichess-dark-border rounded overflow-hidden cursor-pointer transition-colors hover:border-lichess-accent" id="copy-target">
+            <div class="flex-1 p-3 font-mono whitespace-nowrap overflow-hidden text-ellipsis text-lichess-text dark:text-lichess-dark-text text-sm" id="result-link">https://lichess.org/</div>
+            <button class="px-5 bg-lichess-accent text-white border-none cursor-pointer flex items-center justify-center font-medium hover:bg-lichess-accent-hover dark:hover:bg-lichess-accent-hover-dark">Copy</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast fixed bottom-5 left-1/2 -translate-x-1/2 bg-lichess-success text-white py-2.5 px-5 rounded-[20px] text-sm opacity-0 transition-opacity duration-300 pointer-events-none" id="toast">Link copied to clipboard!</div>
+
+<script>
+    // State
+    const state = {
+        username: '',
+        variant: 'any',
+        fen: '',
+        mode: 'any', // any | casual | rated
+        timeType: 'any', // any | realTime | correspondence | unlimited
+        minutes: 10,
+        increment: 0,
+        days: 1,
+        color: 'random' // white | black | random
+    };
+
+    const patronColors = [
+        "hsl(72, 38%, 51.6%)",
+        "hsl(108, 38%, 56.7%)",
+        "hsl(144, 49%, 51.2%)",
+        "hsl(180, 52%, 48.1%)",
+        "hsl(216, 89%, 72.2%)",
+        "hsl(252, 83%, 79.1%)",
+        "hsl(288, 81%, 74.5%)",
+        "hsl(324, 76%, 73.4%)",
+        "hsl(0, 90%, 75.7%)",
+        "hsl(36, 74%, 54.2%)"
+    ];
+
+    // DOM Elements
+    const els = {
+        username: document.getElementById('username'),
+        acList: document.getElementById('autocomplete-list'),
+        variant: document.getElementById('variant'),
+        fenGroup: document.getElementById('fen-group'),
+        fen: document.getElementById('fen'),
+        realTimeInputs: document.getElementById('realtime-inputs'),
+        corrInputs: document.getElementById('correspondence-inputs'),
+        minutes: document.getElementById('minutes'),
+        increment: document.getElementById('increment'),
+        days: document.getElementById('days'),
+        linkText: document.getElementById('result-link'),
+        copyTarget: document.getElementById('copy-target'),
+        toast: document.getElementById('toast'),
+        modeToggle: document.getElementById('mode-toggle')
+    };
+
+    // --- Logic ---
+
+    function generateLink() {
+        const baseUrl = 'https://lichess.org/';
+        const params = new URLSearchParams();
+
+        if (state.username) params.append('user', state.username);
+
+        if (state.variant !== 'any') {
+            if (state.variant === 'fromPosition' && state.fen) {
+                params.append('fen', state.fen);
+            } else if (state.variant) {
+                params.append('variant', state.variant);
+            }
+        }
+
+        if (state.timeType === 'realTime') {
+            params.append('minutesPerSide', state.minutes);
+            params.append('increment', state.increment);
+        } else if (state.timeType === 'correspondence') {
+            params.append('days', state.days);
+        } else if (state.timeType === 'unlimited') {
+            params.append('time', 'unlimited');
+        }
+
+        if (state.mode !== 'any') {
+            if (state.mode) params.append('gameMode', state.mode);
+        }
+
+        if (state.color !== 'random') {
+            params.append('color', state.color);
+        }
+
+        // The lobby controller looks for #friend to trigger the specific logic
+        let finalUrl = `${baseUrl}?${params.toString()}#friend`;
+
+        // Clean up empty ? if no params (unlikely)
+        if (finalUrl.includes('?#')) finalUrl = finalUrl.replace('?#', '#');
+
+        els.linkText.textContent = finalUrl;
+    }
+
+    // --- Event Listeners & UI Helpers ---
+
+    function setMode(mode, element) {
+        if (state.timeType === 'unlimited' && mode === 'rated') return;
+        state.mode = mode;
+        updateToggleUI(element);
+        generateLink();
+    }
+
+    function setTimeType(type, element) {
+        state.timeType = type;
+        updateToggleUI(element);
+
+        // Visibility
+        els.realTimeInputs.classList.add('hidden');
+        els.corrInputs.classList.add('hidden');
+
+        if (type === 'realTime') els.realTimeInputs.classList.remove('hidden');
+        if (type === 'correspondence') els.corrInputs.classList.remove('hidden');
+
+        // Logic check: Unlimited is always casual in Lichess. Set to "any" to not append anything to link.
+        if (type === 'unlimited') {
+           state.mode = 'any';
+           const anyBtn = els.modeToggle.querySelector('[data-mode="any"]');
+           updateToggleUI(anyBtn);
+        }
+
+        generateLink();
+    }
+
+    function setColor(color, element) {
+        state.color = color;
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+        element.classList.add('selected');
+        generateLink();
+    }
+
+    function updateToggleUI(activeElement) {
+        const parent = activeElement.parentElement;
+        parent.querySelectorAll('.toggle-option').forEach(el => el.classList.remove('active'));
+        activeElement.classList.add('active');
+    }
+
+    // Input Listeners
+    els.variant.addEventListener('change', (e) => {
+        state.variant = e.target.value;
+        if (state.variant === 'fromPosition') els.fenGroup.classList.remove('hidden');
+        else els.fenGroup.classList.add('hidden');
+        generateLink();
+    });
+
+    els.fen.addEventListener('input', (e) => { state.fen = e.target.value.trim(); generateLink(); });
+    els.minutes.addEventListener('input', (e) => {
+        state.minutes = Math.min(180, e.target.value);
+        generateLink();
+    });
+    els.increment.addEventListener('input', (e) => {
+        state.increment = Math.min(180, e.target.value);
+        generateLink();
+    });
+    els.days.addEventListener('input', (e) => { state.days = e.target.value; generateLink(); });
+
+    // --- Autocomplete Logic ---
+    let typingTimer;
+
+    els.username.addEventListener('input', (e) => {
+        const val = e.target.value.trim();
+        state.username = val;
+        generateLink();
+
+        clearTimeout(typingTimer);
+        els.acList.innerHTML = '';
+        els.acList.style.display = 'none';
+
+        if (val.length >= 3) {
+            typingTimer = setTimeout(() => fetchUsers(val), 250);
+        }
+    });
+
+    // Hide autocomplete when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!els.username.contains(e.target) && !els.acList.contains(e.target)) {
+            els.acList.style.display = 'none';
+        }
+    });
+
+    async function fetchUsers(term) {
+        try {
+            const response = await fetch(`https://lichess.org/api/player/autocomplete?term=${term}&object=1`);
+            if (!response.ok) return;
+            const data = await response.json();
+
+            els.acList.innerHTML = '';
+
+            if (data.result && data.result.length > 0) {
+                els.acList.style.display = 'block';
+                data.result.forEach(user => {
+                    const div = document.createElement('div');
+                    // Styling for autocomplete items
+                    div.className = 'autocomplete-item p-2.5 cursor-pointer flex items-center hover:bg-lichess-bg dark:hover:bg-lichess-dark-bg';
+
+                    let flairHtml = '';
+                    if (user.patron) {
+                        const color = patronColors[(user.patronColor || 1) - 1] || patronColors[0];
+                        flairHtml = `<span class="patron-icon" style="background-color: ${color}"></span>`;
+                    }
+
+                    // Add Title if exists
+                    let nameDisplay = user.name;
+                    if(user.title) nameDisplay = `<span class="text-lichess-accent font-bold mr-1">${user.title}</span>` + nameDisplay;
+
+                    div.innerHTML = `${flairHtml}<span>${nameDisplay}</span>`;
+
+                    div.addEventListener('click', () => {
+                        els.username.value = user.name;
+                        state.username = user.name;
+                        els.acList.style.display = 'none';
+                        generateLink();
+                    });
+                    els.acList.appendChild(div);
+                });
+            }
+        } catch (err) {
+            console.error("Autocomplete failed:", err);
+        }
+    }
+
+    // Copy Functionality
+    els.copyTarget.addEventListener('click', () => {
+        const text = els.linkText.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            els.toast.classList.add('show');
+            setTimeout(() => els.toast.classList.remove('show'), 2000);
+        });
+    });
+
+    // Initialize
+    generateLink();
+
+</script>
+
+</body>
+</html>

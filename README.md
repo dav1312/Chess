@@ -16,6 +16,12 @@ Group Fishtest tests by worker architecture.
 
 ---
 
+[https://dav1312.github.io/Chess/LichessChallengeLink](https://dav1312.github.io/Chess/LichessChallengeLink)
+
+Generate a reusable Lichess challenge link with your custom settings to share with any opponent.
+
+---
+
 [https://dav1312.github.io/Chess/LichessGameSearch](https://dav1312.github.io/Chess/LichessGameSearch)
 
 Search and browse public chess games from any Lichess.org user.
