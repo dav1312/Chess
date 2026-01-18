@@ -1,111 +1,128 @@
 <html>
-	<head>
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Elo Calculator</title>
-		<link rel="stylesheet" href="style.css" />
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;400;500;600;700;900&display=swap" />
-	</head>
 
-	<body>
-		<div align="center">
-			<form name="form" action="">
-				<table>
-					<tbody style="box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)">
-						<tr class="title">
-							<td colspan="3">
-								<h1 align="center">Elo Calculator</h1>
-							</td>
-						</tr>
-						<tr class="inputs">
-							<td>
-								<table>
-									<tbody>
-										<tr>
-											<td>Wins</td>
-											<td>Losses</td>
-											<td>Draws</td>
-										</tr>
-										<tr>
-											<td>
-												<input name="wins" value="0" size="5" />
-											</td>
-											<td>
-												<input name="losses" value="0" size="5" />
-											</td>
-											<td>
-												<input name="draws" value="0" size="5" />
-											</td>
-										</tr>
-										<td colspan="3">
-											<input type="button" class="button" value="Calculate" size="1" onclick="calcEloFromWDL()" />
+<head>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Elo Calculator</title>
+	<link rel="icon" type="image/x-icon" href="https://lichess1.org/assets/_kelfen/logo/lichess-favicon-512.png">
+	<link rel="stylesheet" href="style.css">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;400;500;600;700;900&display=swap">
+</head>
+
+<body>
+	<div align="center">
+		<form name="form" action="">
+			<table>
+				<tbody
+					style="box-shadow: 0 0 5px rgb(0 0 0 / 45%), 0 4px 8px rgb(0 0 0 / 35%), 0 8px 12px rgb(0 0 0 / 15%)">
+					<tr class="title">
+						<td colspan="3">
+							<h1 align="center">Elo Calculator</h1>
+						</td>
+					</tr>
+					<tr class="inputs">
+						<td>
+							<table>
+								<tbody>
+									<tr>
+										<td>Wins</td>
+										<td>Losses</td>
+										<td>Draws</td>
+									</tr>
+									<tr>
+										<td>
+											<input name="wins" value="0" size="5">
 										</td>
-									</tbody>
-								</table>
-							</td>
-							<td>
-								<table>
-									<tbody>
-										<tr>
-											<td>Points</td>
-											<td></td>
-											<td>Games</td>
-										</tr>
-										<tr>
-											<td>
-												<input name="points" value="0" size="5" />
-											</td>
-											<td>/</td>
-											<td>
-												<input name="totalgames" value="0" size="5" />
-											</td>
-										</tr>
-										<td colspan="3">
-											<input type="button" class="button" value="Calculate" size="1" onclick="calcEloFromScore()" />
+										<td>
+											<input name="losses" value="0" size="5">
 										</td>
-									</tbody>
-								</table>
-							</td>
-							<td>
-								<table>
-									<tbody>
-										<tr>
-											<td>Winning percentage</td>
-										</tr>
-										<tr>
-											<td>
-												<input name="winningPerc" value="50" size="5" style="width: 100%" />
-											</td>
-										</tr>
-										<tr>
-											<td>
-												<input type="button" class="button" value="Calculate" size="1" onclick="calcEloFromPercent()" />
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</td>
-						</tr>
-						<tr class="elodiff">
-							<td colspan="3">
-								<table>
-									<tbody>
-										<tr>
-											<td>
-												Elo Difference:
-												<input name="difference" value="+0" style="width: 120px" />
-												<input type="button" class="button" value="Calculate" size="1" onclick="calcPercentFromElo()" style="width: 120px" />
-											</td>
-										</tr>
-									</tbody>
-								</table>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</form>
-		</div>
-		<script src="script.js"></script>
-	</body>
+										<td>
+											<input name="draws" value="0" size="5">
+										</td>
+									</tr>
+									<td colspan="3">
+										<input type="button" class="button" value="Calculate" size="1"
+											onclick="calcEloFromWDL()"></input>
+									</td>
+								</tbody>
+							</table>
+						</td>
+						<td>
+							<table>
+								<tbody>
+									<tr>
+										<td>Points</td>
+										<td></td>
+										<td>Games</td>
+									</tr>
+									<tr>
+										<td>
+											<input name="points" value="0" size="5">
+										</td>
+										<td>/</td>
+										<td>
+											<input name="totalgames" value="0" size="5">
+										</td>
+									</tr>
+									<td colspan="3">
+										<input type="button" class="button" value="Calculate" size="1"
+											onclick="calcEloFromScore()"></input>
+									</td>
+								</tbody>
+							</table>
+						</td>
+						<td>
+							<table>
+								<tbody>
+									<tr>
+										<td>Winning percentage</td>
+									</tr>
+									<tr>
+										<td>
+											<input name="winningPerc" value="50" size="5" style="width: 100%">
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<input type="button" class="button" value="Calculate" size="1"
+												onclick="calcEloFromPercent()"></input>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+					</tr>
+					<tr class="elodiff">
+						<td colspan="3">
+							<table style="margin-bottom:0">
+								<tbody>
+									<tr>
+										<td>
+											Elo Difference:
+											<input name="difference" value="+0" style="width:150px">
+											Sigma:
+											<select name="sigma">
+												<option value="0.682689492137086">1</option>
+												<option value="0.954499736103642" selected>2</option>
+												<option value="0.997300203936740">3</option>
+												<option value="0.999936657516334">4</option>
+												<option value="0.999999426696856">5</option>
+												<option value="0.999999998026825">6</option>
+												<option value="0.999999999997440">7</option>
+											</select>
+											<input type="button" class="button" value="Calculate" size="1"
+												onclick="calcPercentFromElo()" style="width: 120px">
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+	<script src="script.js"></script>
+</body>
 </html>

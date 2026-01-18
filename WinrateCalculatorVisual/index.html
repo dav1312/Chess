@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stockfish WDL Calculator & Visualizer</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+          background-color: #f0f2f5;
+          color: #1c1e21;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+          margin: 0;
+          padding: 20px;
+          box-sizing: border-box;
+      }
+      .container {
+          background-color: #ffffff;
+          padding: 30px;
+          border-radius: 10px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          max-width: 800px;
+          width: 100%;
+      }
+      h1, h2 {
+          color: #333;
+          border-bottom: 2px solid #e0e0e0;
+          padding-bottom: 10px;
+          margin-top: 0;
+      }
+      .input-group {
+          margin-bottom: 25px;
+      }
+      .input-group label {
+          display: block;
+          font-weight: 600;
+          margin-bottom: 12px;
+      }
+      .slider-container {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+      }
+      input[type="range"] {
+          flex-grow: 1;
+          cursor: pointer;
+      }
+      .slider-value {
+          font-weight: bold;
+          font-size: 1.1em;
+          color: #007bff;
+          min-width: 60px;
+          text-align: center;
+          background-color: #f0f2f5;
+          padding: 5px 0;
+          border-radius: 5px;
+      }
+      .help-text {
+          font-size: 12px;
+          color: #666;
+          margin-top: 8px;
+      }
+      .results-section {
+          margin-top: 30px;
+      }
+      .wdl-bar {
+          display: flex;
+          height: 30px;
+          border-radius: 5px;
+          overflow: hidden;
+          margin-bottom: 10px;
+          border: 1px solid #ccc;
+      }
+      .wdl-bar div {
+          transition: width 0.3s ease-out;
+          text-align: center;
+          color: black;
+          font-weight: bold;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 14px;
+      }
+      .wdl-white { background-color: #f8f9fa; }
+      .wdl-draw { background-color: #c9c9c9; }
+      .wdl-black { background-color: #555555; color: white; }
+
+      .result-details {
+          display: flex;
+          justify-content: space-between;
+          text-align: center;
+      }
+      .result-details div {
+          width: 33%;
+      }
+      .chart-container {
+          margin-top: 40px;
+      }
+      .analysis {
+          margin-top: 40px;
+          background-color: #fafafa;
+          padding: 20px;
+          border-radius: 8px;
+          border: 1px solid #e0e0e0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Stockfish WDL Calculator & Visualizer</h1>
+      <p>
+        Adjust the sliders to see the live-updated WDL probabilities for a
+        specific position, and view the line chart below to see how those
+        probabilities change across a range of evaluations.
+      </p>
+
+      <div class="input-group">
+        <label for="evaluation">Evaluation Score (in Centipawns)</label>
+        <div class="help-text">
+          Positive for White's advantage, negative for Black's.
+        </div>
+        <div class="slider-container">
+          <input
+            type="range"
+            id="evaluation"
+            min="-300"
+            max="300"
+            value="100"
+            step="5"
+          />
+          <span id="evaluationValue" class="slider-value">100</span>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="material">Total Material Count</label>
+        <div class="help-text">
+          Sum the value of all pieces for BOTH sides (P=1, N=3, B=3, R=5, Q=9). 78 is a full board.
+        </div>
+        <div class="slider-container">
+          <input
+            type="range"
+            id="material"
+            min="2"
+            max="78"
+            value="58"
+            step="1"
+          />
+          <span id="materialValue" class="slider-value">58</span>
+        </div>
+      </div>
+
+      <div class="results-section">
+        <h2>Single Point Result</h2>
+        <div class="wdl-bar">
+          <div id="white-bar" class="wdl-white"></div>
+          <div id="draw-bar" class="wdl-draw"></div>
+          <div id="black-bar" class="wdl-black"></div>
+        </div>
+        <div class="result-details">
+          <div>
+            <strong>White Win</strong>
+            <p id="white-pct"></p>
+          </div>
+          <div>
+            <strong>Draw</strong>
+            <p id="draw-pct"></p>
+          </div>
+          <div>
+            <strong>Black Win</strong>
+            <p id="black-pct"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <h2>WDL Probability Curves</h2>
+        <div class="help-text">
+          Shows how win/draw/loss chances change across evaluations for the selected material.
+        </div>
+        <canvas id="wdlChart"></canvas>
+      </div>
+    </div>
+
+    <script>
+      // --- DOM Elements ---
+      const evaluationSlider = document.getElementById('evaluation');
+      const materialSlider = document.getElementById('material');
+      const evaluationValueSpan = document.getElementById('evaluationValue');
+      const materialValueSpan = document.getElementById('materialValue');
+      const whiteBar = document.getElementById('white-bar');
+      const drawBar = document.getElementById('draw-bar');
+      const blackBar = document.getElementById('black-bar');
+      const whitePctText = document.getElementById('white-pct');
+      const drawPctText = document.getElementById('draw-pct');
+      const blackPctText = document.getElementById('black-pct');
+      const chartCanvas = document.getElementById('wdlChart');
+
+      // --- Stockfish Model Constants ---
+      /* https://github.com/official-stockfish/Stockfish/blob/71f53b92c7095f1f145b85d63b8ad49f9ef553f9/src/uci.cpp#L509-L511 */
+      const as = [-72.32565836, 185.93832038, -144.58862193, 416.44950446];
+      const bs = [83.86794042, -136.06112997, 69.98820887, 47.62901433];
+
+      let wdlChart; // Global variable to hold the chart instance
+
+      // --- Core Calculation Logic (from uci.cpp) ---
+      function winRateParams(material) {
+          const m = Math.max(17, Math.min(material, 78)) / 58.0;
+          const a = (((as[0] * m + as[1]) * m + as[2]) * m) + as[3];
+          const b = (((bs[0] * m + bs[1]) * m + bs[2]) * m) + bs[3];
+          return { a, b };
+      }
+
+      function calculateWDLFromCP(cp, material, params) {
+          const { a, b } = params || winRateParams(material);
+          const v_internal = (cp * a) / 100;
+          const win_mille = 1000 / (1 + Math.exp((a - v_internal) / b));
+          const loss_mille = 1000 / (1 + Math.exp((a + v_internal) / b));
+          let draw_mille = 1000 - win_mille - loss_mille;
+          if (draw_mille < 0) draw_mille = 0;
+
+          const total = win_mille + loss_mille + draw_mille;
+          return {
+              win: (win_mille / total) * 100,
+              draw: (draw_mille / total) * 100,
+              loss: (loss_mille / total) * 100,
+          };
+      }
+
+      // --- UI Update Functions ---
+      function updateSinglePointDisplay() {
+          const cp = parseFloat(evaluationSlider.value);
+          const material = parseInt(materialSlider.value);
+
+          evaluationValueSpan.textContent = cp;
+          materialValueSpan.textContent = material;
+
+          const wdl = calculateWDLFromCP(cp, material);
+
+          whitePctText.textContent = wdl.win.toFixed(1) + '%';
+          drawPctText.textContent = wdl.draw.toFixed(1) + '%';
+          blackPctText.textContent = wdl.loss.toFixed(1) + '%';
+
+          whiteBar.style.width = wdl.win + '%';
+          drawBar.style.width = wdl.draw + '%';
+          blackBar.style.width = wdl.loss + '%';
+      }
+
+      function generateChartData(material) {
+          const labels = [], winData = [], drawData = [], lossData = [];
+          const params = winRateParams(material); // Calculate params once for efficiency
+
+          for (let cp = -250; cp <= 250; cp += 10) {
+              labels.push((cp / 100).toFixed(1));
+              const wdl = calculateWDLFromCP(cp, material, params);
+              winData.push(wdl.win);
+              drawData.push(wdl.draw);
+              lossData.push(wdl.loss);
+          }
+          return { labels, winData, drawData, lossData };
+      }
+
+      function updateChart() {
+          const material = parseInt(materialSlider.value);
+          const data = generateChartData(material);
+          wdlChart.data.labels = data.labels;
+          wdlChart.data.datasets[0].data = data.winData;
+          wdlChart.data.datasets[1].data = data.drawData;
+          wdlChart.data.datasets[2].data = data.lossData;
+          wdlChart.update();
+      }
+
+      function initializeChart() {
+          const initialMaterial = parseInt(materialSlider.value);
+          const data = generateChartData(initialMaterial);
+
+          wdlChart = new Chart(chartCanvas, {
+              type: 'line',
+              data: {
+                  labels: data.labels,
+                  datasets: [
+                      { label: 'White Win', data: data.winData, borderColor: '#0d6efd', tension: 0.1, fill: false, borderWidth: 2 },
+                      { label: 'Draw', data: data.drawData, borderColor: '#6c757d', tension: 0.1, fill: false, borderWidth: 2 },
+                      { label: 'Black Win', data: data.lossData, borderColor: '#343a40', tension: 0.1, fill: false, borderWidth: 2 }
+                  ]
+              },
+              options: {
+                  responsive: true,
+                  interaction: { mode: 'index', intersect: false },
+                  scales: {
+                      x: { title: { display: true, text: 'Evaluation (in Pawns)' } },
+                      y: { title: { display: true, text: 'Probability (%)' }, min: 0, max: 100, ticks: { callback: value => value + '%' } }
+                  },
+                  plugins: {
+                      tooltip: {
+                          callbacks: {
+                              label: function(context) {
+                                  return `${context.dataset.label}: ${context.parsed.y.toFixed(1)}%`;
+                              }
+                          }
+                      }
+                  }
+              }
+          });
+      }
+
+      // --- Event Listeners ---
+      evaluationSlider.addEventListener('input', updateSinglePointDisplay);
+      materialSlider.addEventListener('input', () => {
+          updateSinglePointDisplay();
+          updateChart();
+      });
+
+      window.addEventListener('load', () => {
+          updateSinglePointDisplay();
+          initializeChart();
+      });
+    </script>
+  </body>
+</html>
