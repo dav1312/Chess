@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Search and browse public chess games from any Lichess.org user with advanced filtering options for variants, ratings, and opponents.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/webp" href="https://lichess1.org/assets/______4/flair/img/activity.lichess.webp" sizes="100x100">
+    <title>Lichess Game Search</title>
+    <link rel="stylesheet" href="../Utils/Bootstrap/css/bootstrap.min.css">
+    <script src="../Utils/Bootstrap/js/bootstrap.bundle.min.js" defer></script>
+    <script src="script.js" defer></script>
+    <style>
+        :root {
+            --bs-success-rgb: 38, 207, 129;
+        }
+        body {
+            padding: 20px;
+        }
+        p {
+            margin-bottom: .5rem;
+        }
+        .card-body > p:last-child {
+            margin-bottom: 0;
+        }
+        .text-bg-title {
+            background-color: hsl(37, 74%, 43%);
+            color: #fff;
+        }
+        .text-bg-bot {
+            background-color: hsl(294, 62%, 48%);
+            color: #fff;
+        }
+        body:has(#onlySearched:checked) .notSearchedUser {
+            display: none;
+        }
+        body:has(#onlyRated:checked) .casual {
+            display: none;
+        }
+        .dropdown-menu {
+            --bs-dropdown-zindex: 1021;
+        }
+    </style>
+</head>
+<body>
+    <main class="container-xxl">
+        <h1>Lichess Game Search</h1>
+        <form id="search-form">
+            <div class="input-group mb-3">
+                <label class="input-group-text">Username</label>
+                <input type="text" class="form-control" id="username" required>
+                <label class="input-group-text">vs</label>
+                <input type="text" class="form-control" id="versus">
+                <label class="input-group-text">Until</label>
+                <input type="date" class="form-control" id="until" name="until">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <input type="checkbox" class="btn-check" id="onlySearched" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="onlySearched">Searched</label>
+                <input type="checkbox" class="btn-check" id="onlyRated" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="onlyRated">Rated</label>
+                <input type="checkbox" class="btn-check" id="oldFirst" autocomplete="off">
+                <label class="btn btn-outline-secondary" for="oldFirst">Asc date</label>
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownPerfType" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                    Variant
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownPerfType">
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="ultraBullet"> UltraBullet</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="bullet"> Bullet</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="blitz"> Blitz</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="rapid"> Rapid</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="classical"> Classical</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="correspondence"> Correspondence</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="chess960"> Chess960</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="crazyhouse"> Crazyhouse</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="antichess"> Antichess</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="atomic"> Atomic</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="horde"> Horde</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="kingOfTheHill"> King of the Hill</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="racingKings"> Racing Kings</label></li>
+                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="threeCheck"> Three-check</label></li>
+                </ul>
+            </div>
+        </form>
+        <div id="playerData" class="row g-3 mb-3"></div>
+        <div id="results" class="container-xxl"></div>
+    </main>
+</body>
+</html>

@@ -16,6 +16,12 @@ Group Fishtest tests by worker architecture.
 
 ---
 
+[https://dav1312.github.io/Chess/LichessGameSearch](https://dav1312.github.io/Chess/LichessGameSearch)
+
+Search and browse public chess games from any Lichess.org user.
+
+---
+
 [https://dav1312.github.io/Chess/StockfishCommits](https://dav1312.github.io/Chess/StockfishCommits)
 
 See all of the Stockfish commits and download the latest version.
