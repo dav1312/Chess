@@ -42,17 +42,8 @@
             @apply bg-lichess-accent text-white font-medium;
         }
 
-        .color-btn.selected {
-            @apply border-lichess-accent scale-110 shadow-[0_0_0_2px_#3692e7];
-        }
-
         .toast.show {
             @apply opacity-100;
-        }
-
-        /* Custom Gradient for Random Color */
-        .color-random {
-            background: linear-gradient(90deg, #f0f0f0 50%, #333 50%);
         }
 
         /* Patron Icon Mask */
@@ -143,7 +134,11 @@
 
     <!-- Time Inputs: Real Time -->
     <div id="realtime-inputs" class="mb-5 relative hidden">
-        <div class="flex gap-2.5">
+        <label class="flex items-center gap-2 mb-3 text-sm text-lichess-secondary dark:text-lichess-dark-secondary cursor-pointer">
+            <input type="checkbox" id="rt-any" class="accent-lichess-accent w-4 h-4">
+            <span>Any time limit</span>
+        </label>
+        <div class="flex gap-2.5" id="rt-values">
             <div class="flex-1">
                 <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Minutes</label>
                 <input type="number" id="minutes" value="10" min="0" max="180"
@@ -159,18 +154,25 @@
 
     <!-- Time Inputs: Correspondence -->
     <div id="correspondence-inputs" class="mb-5 relative hidden">
-        <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Days per turn</label>
-        <input type="number" id="days" value="1" min="1" max="14"
-               class="w-full p-2.5 rounded border border-lichess-border dark:border-lichess-dark-border bg-lichess-input dark:bg-lichess-dark-input text-lichess-text dark:text-lichess-dark-text text-base outline-none transition-colors focus:border-lichess-accent">
+        <label class="flex items-center gap-2 mb-3 text-sm text-lichess-secondary dark:text-lichess-dark-secondary cursor-pointer">
+            <input type="checkbox" id="c-any" class="accent-lichess-accent w-4 h-4">
+            <span>Any days per turn</span>
+        </label>
+        <div id="c-values">
+            <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Days per turn</label>
+            <input type="number" id="days" value="1" min="1" max="14"
+                   class="w-full p-2.5 rounded border border-lichess-border dark:border-lichess-dark-border bg-lichess-input dark:bg-lichess-dark-input text-lichess-text dark:text-lichess-dark-text text-base outline-none transition-colors focus:border-lichess-accent">
+        </div>
     </div>
 
     <!-- Color -->
     <div class="mb-5 relative">
         <label class="block mb-2 text-sm text-lichess-secondary dark:text-lichess-dark-secondary">Color</label>
-        <div class="flex justify-center gap-4 mt-2">
-            <div class="color-btn w-10 h-10 rounded-full border-2 border-lichess-border dark:border-lichess-dark-border cursor-pointer relative transition-transform bg-[#333]" onclick="setColor('black', this)" title="Black"></div>
-            <div class="color-btn color-random w-10 h-10 rounded-full border-2 border-lichess-border dark:border-lichess-dark-border cursor-pointer relative transition-transform selected" onclick="setColor('random', this)" title="Random"></div>
-            <div class="color-btn w-10 h-10 rounded-full border-2 border-lichess-border dark:border-lichess-dark-border cursor-pointer relative transition-transform bg-[#f0f0f0]" onclick="setColor('white', this)" title="White"></div>
+        <div class="flex flex-wrap gap-2.5 bg-lichess-input dark:bg-lichess-dark-input p-1 rounded-md border border-lichess-border dark:border-lichess-dark-border">
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none active" onclick="setColor('any', this)">Any</div>
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none" onclick="setColor('random', this)">Random</div>
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none" onclick="setColor('white', this)">White</div>
+            <div class="toggle-option flex-1 text-center p-2 cursor-pointer rounded text-sm transition-all select-none" onclick="setColor('black', this)">Black</div>
         </div>
     </div>
 
@@ -197,7 +199,9 @@
         minutes: 10,
         increment: 0,
         days: 1,
-        color: 'random' // white | black | random
+        rtAny: false,
+        corrAny: false,
+        color: 'any' // white | black | random | any
     };
 
     const patronColors = [
@@ -221,7 +225,11 @@
         fenGroup: document.getElementById('fen-group'),
         fen: document.getElementById('fen'),
         realTimeInputs: document.getElementById('realtime-inputs'),
+        rtValues: document.getElementById('rt-values'),
+        rtAnyCheckbox: document.getElementById('rt-any'),
         corrInputs: document.getElementById('correspondence-inputs'),
+        corrValues: document.getElementById('c-values'),
+        corrAnyCheckbox: document.getElementById('c-any'),
         minutes: document.getElementById('minutes'),
         increment: document.getElementById('increment'),
         days: document.getElementById('days'),
@@ -248,10 +256,18 @@
         }
 
         if (state.timeType === 'realTime') {
-            params.append('minutesPerSide', state.minutes);
-            params.append('increment', state.increment);
+            if (state.rtAny) {
+                params.append('time', 'realTime');
+            } else {
+                params.append('minutesPerSide', state.minutes);
+                params.append('increment', state.increment);
+            }
         } else if (state.timeType === 'correspondence') {
-            params.append('days', state.days);
+            if (state.corrAny) {
+                params.append('time', 'correspondence');
+            } else {
+                params.append('days', state.days);
+            }
         } else if (state.timeType === 'unlimited') {
             params.append('time', 'unlimited');
         }
@@ -260,7 +276,7 @@
             if (state.mode) params.append('gameMode', state.mode);
         }
 
-        if (state.color !== 'random') {
+        if (state.color !== 'any') {
             params.append('color', state.color);
         }
 
@@ -305,8 +321,7 @@
 
     function setColor(color, element) {
         state.color = color;
-        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
-        element.classList.add('selected');
+        updateToggleUI(element);
         generateLink();
     }
 
@@ -334,6 +349,20 @@
         generateLink();
     });
     els.days.addEventListener('input', (e) => { state.days = e.target.value; generateLink(); });
+
+    els.rtAnyCheckbox.addEventListener('change', (e) => {
+        state.rtAny = e.target.checked;
+        if (state.rtAny) els.rtValues.classList.add('opacity-50', 'pointer-events-none');
+        else els.rtValues.classList.remove('opacity-50', 'pointer-events-none');
+        generateLink();
+    });
+
+    els.corrAnyCheckbox.addEventListener('change', (e) => {
+        state.corrAny = e.target.checked;
+        if (state.corrAny) els.corrValues.classList.add('opacity-50', 'pointer-events-none');
+        else els.corrValues.classList.remove('opacity-50', 'pointer-events-none');
+        generateLink();
+    });
 
     // --- Autocomplete Logic ---
     let typingTimer;
