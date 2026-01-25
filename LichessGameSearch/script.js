@@ -67,6 +67,84 @@ const createElement = (tag, options = {}, children = []) => {
     return el;
 };
 
+const patronColors = [
+    "hsl(72, 38%, 51.6%)",
+    "hsl(108, 38%, 56.7%)",
+    "hsl(144, 49%, 51.2%)",
+    "hsl(180, 52%, 48.1%)",
+    "hsl(216, 89%, 72.2%)",
+    "hsl(252, 83%, 79.1%)",
+    "hsl(288, 81%, 74.5%)",
+    "hsl(324, 76%, 73.4%)",
+    "hsl(0, 90%, 75.7%)",
+    "hsl(36, 74%, 54.2%)"
+];
+
+const initAutocomplete = (inputId, listId) => {
+    const input = document.getElementById(inputId);
+    const list = document.getElementById(listId);
+    let timer;
+
+    input.addEventListener('input', () => {
+        const term = input.value.trim();
+        clearTimeout(timer);
+        list.innerHTML = '';
+        list.style.display = 'none';
+
+        if (term.length >= 3) {
+            timer = setTimeout(async () => {
+                try {
+                    const response = await fetch(`https://lichess.org/api/player/autocomplete?term=${term}&object=1`);
+                    if (!response.ok) return;
+                    const data = await response.json();
+
+                    if (data.result && data.result.length > 0) {
+                        list.style.display = 'block';
+                        data.result.forEach(user => {
+                            const item = createElement('button', { 
+                                className: 'list-group-item list-group-item-action d-flex align-items-center' 
+                            });
+
+                            if (user.patron) {
+                                const color = patronColors[(user.patronColor || 1) - 1] || patronColors[0];
+                                item.appendChild(createElement('span', { 
+                                    className: 'patron-icon', 
+                                    style: { backgroundColor: color } 
+                                }));
+                            }
+
+                            if (user.title) {
+                                item.appendChild(createElement('span', { 
+                                    className: `px-1 fw-bold font-monospace me-1 ${user.title === "BOT" ? "text-bg-bot" : "text-bg-title"} bg-opacity-100 rounded-1`, 
+                                    textContent: user.title 
+                                }));
+                            }
+
+                            item.appendChild(createElement('span', { textContent: user.name }));
+
+                            item.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                input.value = user.name;
+                                list.style.display = 'none';
+                            });
+                            list.appendChild(item);
+                        });
+                    }
+                } catch (err) { console.error(err); }
+            }, 250);
+        }
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!input.contains(e.target) && !list.contains(e.target)) {
+            list.style.display = 'none';
+        }
+    });
+};
+
+initAutocomplete('username', 'username-ac');
+initAutocomplete('versus', 'versus-ac');
+
 document.getElementById('search-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     const relativeTime = (epoch) => {
@@ -200,6 +278,15 @@ document.getElementById('search-form').addEventListener('submit', async function
         else if (suspiciousInfo.sandbagger === playerColor) { outcomeIcon = '🔻'; outcomeTitle = 'Potential Sandbag'; }
 
         const children = [];
+        
+        if (isUser && player.user.patron) {
+            const color = patronColors[(player.user.patronColor || 1) - 1] || patronColors[0];
+            children.push(createElement('span', { 
+                className: 'patron-icon', 
+                style: { backgroundColor: color } 
+            }));
+        }
+
         if (badge) {
             children.push(createElement('span', { className: `px-1 fw-bold font-monospace ${badgeClass} bg-opacity-100 rounded-1`, textContent: badge }));
             children.push(' ');
