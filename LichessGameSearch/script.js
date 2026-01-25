@@ -243,19 +243,21 @@ document.getElementById('search-form').addEventListener('submit', async function
     response = await fetch(url, {headers: {'Accept': 'application/x-ndjson'}});
     const games = await response.text();
 
-    const resultsContainer = document.getElementById('results');
-    resultsContainer.innerHTML = ''; // Clear previous results
+    const resultsTable = document.getElementById('results');
+    resultsTable.innerHTML = ''; // Clear previous results
 
     // Create Results Header
-    const header = createElement('div', { className: 'row align-items-center p-2 border-bottom sticky-top bg-body' }, [
-        createElement('div', { className: 'col-3', textContent: 'Speed' }),
-        createElement('div', { className: 'col-3', textContent: 'Player' }),
-        createElement('div', { className: 'col-1 text-center', textContent: 'Accuracy' }),
-        createElement('div', { className: 'col-1 text-center', textContent: 'Moves' }),
-        createElement('div', { className: 'col-3 text-center', textContent: 'Result' }),
-        createElement('div', { className: 'col-1 text-center', textContent: 'Date' })
+    const thead = createElement('thead', { className: 'bg-body' }, [
+        createElement('tr', {}, [
+            createElement('th', { textContent: 'Speed' }),
+            createElement('th', { textContent: 'Player' }),
+            createElement('th', { className: 'text-center', textContent: 'Accuracy' }),
+            createElement('th', { className: 'text-center', textContent: 'Moves' }),
+            createElement('th', { className: 'text-center', textContent: 'Result' }),
+            createElement('th', { className: 'text-center', textContent: 'Date' })
+        ])
     ]);
-    resultsContainer.appendChild(header);
+    resultsTable.appendChild(thead);
 
     const playerTemplate = (gameData, player, playerColor, suspiciousInfo, username) => {
         const isUser = "user" in player;
@@ -315,7 +317,7 @@ document.getElementById('search-form').addEventListener('submit', async function
         ]);
     };
 
-    const resultsFragment = document.createDocumentFragment();
+    const tbody = createElement('tbody');
     games.split('\n').forEach(function(game) {
         if (game.trim() !== '') {
             const gameData = JSON.parse(game);
@@ -330,14 +332,14 @@ document.getElementById('search-form').addEventListener('submit', async function
             }+${gameData.clock.increment} • ` : "";
             const sourceIconText = gameData.source === "arena" || gameData.source === "swiss" ? " • 🏆" : gameData.source === "simul" ? " • 👨‍👩‍👧‍👦" : "";
 
-            const row = createElement('div', { className: `row align-items-center p-2 position-relative border-bottom ${gameData.rated ? "rated" : "casual"} ${bannedPlayersClass}` }, [
-                createElement('a', {
-                    className: 'position-absolute h-100 start-0 top-0 w-100 z-2',
-                    href: `https://lichess.org/${gameData.id}`,
-                    target: '_blank',
-                    rel: 'noopener noreferrer'
-                }),
-                createElement('div', { className: 'col-3' }, [
+            const row = createElement('tr', { className: `text-nowrap position-relative ${gameData.rated ? "rated" : "casual"} ${bannedPlayersClass}` }, [
+                createElement('td', { className: 'bg-transparent' }, [
+                    createElement('a', {
+                        className: 'position-absolute h-100 start-0 top-0 w-100 z-2',
+                        href: `https://lichess.org/${gameData.id}`,
+                        target: '_blank',
+                        rel: 'noopener noreferrer'
+                    }),
                     createElement('div', {}, [
                         document.createTextNode(clockText),
                         createElement('span', { textContent: gameData.speed.charAt(0).toUpperCase() + gameData.speed.slice(1) }),
@@ -345,27 +347,27 @@ document.getElementById('search-form').addEventListener('submit', async function
                         createElement('span', { textContent: sourceIconText })
                     ])
                 ]),
-                createElement('div', { className: 'col-3' }, [
+                createElement('td', { className: 'bg-transparent' }, [
                     playerTemplate(gameData, gameData.players.white, 'white', suspiciousInfo, username),
                     playerTemplate(gameData, gameData.players.black, 'black', suspiciousInfo, username)
                 ]),
-                createElement('div', { className: 'col-1 text-center' }, [
+                createElement('td', { className: 'text-center bg-transparent' }, [
                     gameAnalysis(gameData.players.white, username),
                     gameAnalysis(gameData.players.black, username)
                 ]),
-                createElement('div', { className: 'col-1 text-center' }, [
+                createElement('td', { className: 'text-center bg-transparent' }, [
                     createElement('span', { textContent: gameData.moves.split(' ').filter((_, i) => i % 2 === 0).length })
                 ]),
-                createElement('div', { className: 'col-3 text-center' }, [
+                createElement('td', { className: 'text-center bg-transparent' }, [
                     document.createTextNode(gameData.status.charAt(0).toUpperCase() + gameData.status.slice(1)),
                     "winner" in gameData ? createElement('span', { textContent: ` • ${gameData.winner.charAt(0).toUpperCase() + gameData.winner.slice(1)} wins` }) : null
                 ]),
-                createElement('div', { className: 'col-1 text-center' }, [
+                createElement('td', { className: 'text-center bg-transparent' }, [
                     createElement('span', { textContent: relativeTime(gameData.lastMoveAt) })
                 ])
             ]);
-            resultsFragment.appendChild(row);
+            tbody.appendChild(row);
         }
     });
-    resultsContainer.appendChild(resultsFragment);
+    resultsTable.appendChild(tbody);
 });
