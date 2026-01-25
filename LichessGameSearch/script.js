@@ -94,7 +94,7 @@ const initAutocomplete = (inputId, listId) => {
         if (term.length >= 3) {
             timer = setTimeout(async () => {
                 try {
-                    const response = await fetch(`https://lichess.org/api/player/autocomplete?term=${term}&object=1`);
+                    const response = await fetch(`https://lichess.org/api/player/autocomplete?term=${encodeURIComponent(term)}&object=1`);
                     if (!response.ok) return;
                     const data = await response.json();
 
@@ -165,7 +165,7 @@ document.getElementById('search-form').addEventListener('submit', async function
     const playerDataContainer = document.getElementById('playerData');
     playerDataContainer.innerHTML = ''; // Clear previous results
 
-    let response = await fetch(`https://lichess.org/api/user/${username}`);
+    let response = await fetch(`https://lichess.org/api/user/${encodeURIComponent(username)}`);
     const data = await response.json();
     if (response.ok) {
         // Player Info Card
@@ -219,7 +219,7 @@ document.getElementById('search-form').addEventListener('submit', async function
         playerDataContainer.textContent = 'Error: ' + response.statusText;
     }
 
-    let url = 'https://lichess.org/api/games/user/' + username + '?accuracy=true&max=100';
+    let url = 'https://lichess.org/api/games/user/' + encodeURIComponent(username) + '?accuracy=true&max=100&';
     const until = document.getElementById('until').value;
     if (until) {
         url += `&until=${new Date(until).getTime()}`;
@@ -232,7 +232,7 @@ document.getElementById('search-form').addEventListener('submit', async function
     }
     const versus = document.getElementById('versus').value.trim();
     if (versus) {
-        url += `&vs=${versus}`;
+        url += `&vs=${encodeURIComponent(versus)}`;
     }
     const checkedPerfTypes = Array.from(document.querySelectorAll('input[name="perfType"]:checked'))
                                     .map(checkbox => checkbox.value);
@@ -371,3 +371,11 @@ document.getElementById('search-form').addEventListener('submit', async function
     });
     resultsTable.appendChild(tbody);
 });
+
+// Auto-trigger search from URL parameter
+const params = new URLSearchParams(window.location.search);
+const userParam = params.get('username');
+if (userParam) {
+    document.getElementById('username').value = userParam;
+    document.getElementById('search-form').requestSubmit();
+}
