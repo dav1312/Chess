@@ -219,7 +219,8 @@ document.getElementById('search-form').addEventListener('submit', async function
         playerDataContainer.textContent = 'Error: ' + response.statusText;
     }
 
-    let url = 'https://lichess.org/api/games/user/' + encodeURIComponent(username) + '?accuracy=true&max=100&';
+    const maxGames = 100;
+    let url = 'https://lichess.org/api/games/user/' + encodeURIComponent(username) + '?accuracy=true&max=' + maxGames + '&';
     const until = document.getElementById('until').value;
     if (until) {
         url += `&until=${new Date(until).getTime()}`;
@@ -240,11 +241,8 @@ document.getElementById('search-form').addEventListener('submit', async function
         url += `&perfType=${checkedPerfTypes.join(',')}`;
     }
 
-    response = await fetch(url, {headers: {'Accept': 'application/x-ndjson'}});
-    const games = await response.text();
-
     const resultsTable = document.getElementById('results');
-    resultsTable.innerHTML = ''; // Clear previous results
+    resultsTable.innerHTML = ''; 
 
     // Create Results Header
     const thead = createElement('thead', { className: 'bg-body' }, [
@@ -258,6 +256,8 @@ document.getElementById('search-form').addEventListener('submit', async function
         ])
     ]);
     resultsTable.appendChild(thead);
+    const tbody = createElement('tbody');
+    resultsTable.appendChild(tbody);
 
     const playerTemplate = (gameData, player, playerColor, suspiciousInfo, username) => {
         const isUser = "user" in player;
@@ -317,59 +317,76 @@ document.getElementById('search-form').addEventListener('submit', async function
         ]);
     };
 
-    const tbody = createElement('tbody');
-    games.split('\n').forEach(function(game) {
-        if (game.trim() !== '') {
-            const gameData = JSON.parse(game);
-            const suspiciousInfo = getSuspiciousGameInfo(gameData);
-            let bannedPlayersClass = "";
-            if (gameData.rated && gameData.moves.split(' ').length > 18 && !("ratingDiff" in gameData.players.white) && !("ratingDiff" in gameData.players.black)) {
-                bannedPlayersClass = "bg-danger text-white bg-opacity-25";
+    try {
+        response = await fetch(url, {headers: {'Accept': 'application/x-ndjson'}});
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        
+        let partialLine = "";
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = (partialLine + chunk).split('\n');
+            partialLine = lines.pop(); // The last element is either empty or a partial line
+
+            for (const line of lines) {
+                if (line.trim() !== '') {
+                    const gameData = JSON.parse(line);
+                    const suspiciousInfo = getSuspiciousGameInfo(gameData);
+                    let bannedPlayersClass = "";
+                    if (gameData.rated && gameData.moves.split(' ').length > 18 && !("ratingDiff" in gameData.players.white) && !("ratingDiff" in gameData.players.black)) {
+                        bannedPlayersClass = "bg-danger text-white bg-opacity-25";
+                    }
+
+                    const clockText = "clock" in gameData ? `${
+                        gameData.clock.initial / 60 === 0.5 ? "½" : gameData.clock.initial / 60 === 0.25 ? "¼" : gameData.clock.initial / 60 === 0.75 ? "¾" : gameData.clock.initial / 60
+                    }+${gameData.clock.increment} • ` : "";
+                    const sourceIconText = gameData.source === "arena" || gameData.source === "swiss" ? " • 🏆" : gameData.source === "simul" ? " • 👨‍👩‍👧‍👦" : "";
+
+                    const row = createElement('tr', { className: `text-nowrap position-relative ${gameData.rated ? "rated" : "casual"} ${bannedPlayersClass}` }, [
+                        createElement('td', { className: 'bg-transparent' }, [
+                            createElement('a', {
+                                className: 'position-absolute h-100 start-0 top-0 w-100 z-2',
+                                href: `https://lichess.org/${gameData.id}`,
+                                target: '_blank',
+                                rel: 'noopener noreferrer'
+                            }),
+                            createElement('div', {}, [
+                                document.createTextNode(clockText),
+                                createElement('span', { textContent: gameData.speed.charAt(0).toUpperCase() + gameData.speed.slice(1) }),
+                                document.createTextNode(` • ${gameData.rated ? "Rated" : "Casual"}`),
+                                createElement('span', { textContent: sourceIconText })
+                            ])
+                        ]),
+                        createElement('td', { className: 'bg-transparent' }, [
+                            playerTemplate(gameData, gameData.players.white, 'white', suspiciousInfo, username),
+                            playerTemplate(gameData, gameData.players.black, 'black', suspiciousInfo, username)
+                        ]),
+                        createElement('td', { className: 'text-center bg-transparent' }, [
+                            gameAnalysis(gameData.players.white, username),
+                            gameAnalysis(gameData.players.black, username)
+                        ]),
+                        createElement('td', { className: 'text-center bg-transparent' }, [
+                            createElement('span', { textContent: gameData.moves.split(' ').filter((_, i) => i % 2 === 0).length })
+                        ]),
+                        createElement('td', { className: 'text-center bg-transparent' }, [
+                            document.createTextNode(gameData.status.charAt(0).toUpperCase() + gameData.status.slice(1)),
+                            "winner" in gameData ? createElement('span', { textContent: ` • ${gameData.winner.charAt(0).toUpperCase() + gameData.winner.slice(1)} wins` }) : null
+                        ]),
+                        createElement('td', { className: 'text-center bg-transparent' }, [
+                            createElement('span', { textContent: relativeTime(gameData.lastMoveAt) })
+                        ])
+                    ]);
+                    tbody.appendChild(row);
+                }
             }
-
-            const clockText = "clock" in gameData ? `${
-                gameData.clock.initial / 60 === 0.5 ? "½" : gameData.clock.initial / 60 === 0.25 ? "¼" : gameData.clock.initial / 60 === 0.75 ? "¾" : gameData.clock.initial / 60
-            }+${gameData.clock.increment} • ` : "";
-            const sourceIconText = gameData.source === "arena" || gameData.source === "swiss" ? " • 🏆" : gameData.source === "simul" ? " • 👨‍👩‍👧‍👦" : "";
-
-            const row = createElement('tr', { className: `text-nowrap position-relative ${gameData.rated ? "rated" : "casual"} ${bannedPlayersClass}` }, [
-                createElement('td', { className: 'bg-transparent' }, [
-                    createElement('a', {
-                        className: 'position-absolute h-100 start-0 top-0 w-100 z-2',
-                        href: `https://lichess.org/${gameData.id}`,
-                        target: '_blank',
-                        rel: 'noopener noreferrer'
-                    }),
-                    createElement('div', {}, [
-                        document.createTextNode(clockText),
-                        createElement('span', { textContent: gameData.speed.charAt(0).toUpperCase() + gameData.speed.slice(1) }),
-                        document.createTextNode(` • ${gameData.rated ? "Rated" : "Casual"}`),
-                        createElement('span', { textContent: sourceIconText })
-                    ])
-                ]),
-                createElement('td', { className: 'bg-transparent' }, [
-                    playerTemplate(gameData, gameData.players.white, 'white', suspiciousInfo, username),
-                    playerTemplate(gameData, gameData.players.black, 'black', suspiciousInfo, username)
-                ]),
-                createElement('td', { className: 'text-center bg-transparent' }, [
-                    gameAnalysis(gameData.players.white, username),
-                    gameAnalysis(gameData.players.black, username)
-                ]),
-                createElement('td', { className: 'text-center bg-transparent' }, [
-                    createElement('span', { textContent: gameData.moves.split(' ').filter((_, i) => i % 2 === 0).length })
-                ]),
-                createElement('td', { className: 'text-center bg-transparent' }, [
-                    document.createTextNode(gameData.status.charAt(0).toUpperCase() + gameData.status.slice(1)),
-                    "winner" in gameData ? createElement('span', { textContent: ` • ${gameData.winner.charAt(0).toUpperCase() + gameData.winner.slice(1)} wins` }) : null
-                ]),
-                createElement('td', { className: 'text-center bg-transparent' }, [
-                    createElement('span', { textContent: relativeTime(gameData.lastMoveAt) })
-                ])
-            ]);
-            tbody.appendChild(row);
         }
-    });
-    resultsTable.appendChild(tbody);
+    } catch (err) {
+        console.error(err);
+    }
 });
 
 // Auto-trigger search from URL parameter
