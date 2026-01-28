@@ -73,60 +73,78 @@
                     </div>
 
                     <!-- Architecture Summary Table -->
-                    <div class="table-responsive rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-700">
-                            <thead class="bg-gray-700">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="arch">Architecture</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="pentanomial">Pentanomial</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="elo">Elo (95% CI)</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="llr1">LLR (0.5-2.5)</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="llr2">LLR (0-2)</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="llr3">LLR (-1.75-0.25)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="summaryTableBody" class="bg-gray-800 divide-y divide-gray-700">
-                                <!-- Table rows will be populated here -->
-                            </tbody>
-                        </table>
+                    <div>
+                        <div class="flex justify-between items-center mb-2 px-1">
+                            <h3 class="text-lg font-semibold text-gray-200">Architectures</h3>
+                            <button id="btnCopyArch" onclick="copyTableToMarkdown('archTable', 'btnCopyArch')" class="text-xs bg-gray-700 hover:bg-gray-600 text-gray-200 py-1 px-3 rounded transition-colors border border-gray-600">Copy table</button>
+                        </div>
+                        <div class="table-responsive rounded-lg">
+                            <table id="archTable" class="min-w-full divide-y divide-gray-700">
+                                <thead class="bg-gray-700">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="arch">Architecture</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="pentanomial">Pentanomial</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="elo">Elo (95% CI)</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="llr1">0.5,2.5</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="llr2">0,2</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header" data-sort="llr3">-1.75,0.25</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="summaryTableBody" class="bg-gray-800 divide-y divide-gray-700">
+                                    <!-- Table rows will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <!-- Compiler Summary Table -->
-                    <div class="table-responsive rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-700">
-                            <thead class="bg-gray-700">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="compiler">Compiler</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="pentanomial">Pentanomial</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="elo">Elo (95% CI)</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="llr1">LLR (0.5-2.5)</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="llr2">LLR (0-2)</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="llr3">LLR (-1.75-0.25)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="compilerSummaryTableBody" class="bg-gray-800 divide-y divide-gray-700">
-                                <!-- Table rows will be populated here -->
-                            </tbody>
-                        </table>
+                    <div>
+                        <div class="flex justify-between items-center mb-2 px-1">
+                            <h3 class="text-lg font-semibold text-gray-200">Compilers</h3>
+                            <button id="btnCopyCompiler" onclick="copyTableToMarkdown('compilerTable', 'btnCopyCompiler')" class="text-xs bg-gray-700 hover:bg-gray-600 text-gray-200 py-1 px-3 rounded transition-colors border border-gray-600">Copy table</button>
+                        </div>
+                        <div class="table-responsive rounded-lg">
+                            <table id="compilerTable" class="min-w-full divide-y divide-gray-700">
+                                <thead class="bg-gray-700">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="compiler">Compiler</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="pentanomial">Pentanomial</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="elo">Elo (95% CI)</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="llr1">0.5,2.5</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="llr2">0,2</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-compiler" data-sort="llr3">-1.75,0.25</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="compilerSummaryTableBody" class="bg-gray-800 divide-y divide-gray-700">
+                                    <!-- Table rows will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <!-- User Summary Table -->
-                    <div class="table-responsive rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-700">
-                            <thead class="bg-gray-700">
-                                <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="user">User/Runner</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="pentanomial">Pentanomial</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="elo">Elo (95% CI)</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="llr1">LLR (0.5-2.5)</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="llr2">LLR (0-2)</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="llr3">LLR (-1.75-0.25)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="userSummaryTableBody" class="bg-gray-800 divide-y divide-gray-700">
-                                <!-- Table rows will be populated here -->
-                            </tbody>
-                        </table>
+                    <div>
+                        <div class="flex justify-between items-center mb-2 px-1">
+                            <h3 class="text-lg font-semibold text-gray-200">Users</h3>
+                            <button id="btnCopyUser" onclick="copyTableToMarkdown('userTable', 'btnCopyUser')" class="text-xs bg-gray-700 hover:bg-gray-600 text-gray-200 py-1 px-3 rounded transition-colors border border-gray-600">Copy table</button>
+                        </div>
+                        <div class="table-responsive rounded-lg">
+                            <table id="userTable" class="min-w-full divide-y divide-gray-700">
+                                <thead class="bg-gray-700">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="user">User/Runner</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="pentanomial">Pentanomial</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="elo">Elo (95% CI)</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="llr1">0.5,2.5</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="llr2">0,2</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider sortable-header-user" data-sort="llr3">-1.75,0.25</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userSummaryTableBody" class="bg-gray-800 divide-y divide-gray-700">
+                                    <!-- Table rows will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -606,6 +624,62 @@
             renderUserTable(sortedData);
         }
 
+        // --- Utility Functions ---
+        function copyTableToMarkdown(tableId, btnId) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+
+            // Gather headers
+            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText.trim());
+
+            // Gather rows
+            const rows = Array.from(table.querySelectorAll('tbody tr')).map(row => {
+                return Array.from(row.querySelectorAll('td')).map(td => td.innerText.trim().replace(/\n/g, ' '));
+            });
+
+            // Calculate max width for each column
+            const columnWidths = headers.map(h => h.length);
+
+            rows.forEach(row => {
+                row.forEach((cell, index) => {
+                    if (cell.length > columnWidths[index]) {
+                        columnWidths[index] = cell.length;
+                    }
+                });
+            });
+
+            // Helper to pad text
+            const pad = (text, length) => {
+                return text + ' '.repeat(length - text.length);
+            };
+
+            let md = "";
+
+            // Header Row
+            md += "| " + headers.map((h, i) => pad(h, columnWidths[i])).join(" | ") + " |\n";
+
+            // Separator Row
+            md += "| " + columnWidths.map(w => '-'.repeat(w)).join(" | ") + " |\n";
+
+            // Body Rows
+            rows.forEach(row => {
+                md += "| " + row.map((cell, i) => pad(cell, columnWidths[i])).join(" | ") + " |\n";
+            });
+
+            navigator.clipboard.writeText(md).then(() => {
+                const btn = document.getElementById(btnId);
+                const originalText = btn.innerText;
+                btn.innerText = "Copied!";
+                btn.classList.add("bg-green-700");
+                btn.classList.remove("bg-gray-700");
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.remove("bg-green-700");
+                    btn.classList.add("bg-gray-700");
+                }, 2000);
+            });
+        }
+
         // --- Event Handler ---
 
         document.getElementById('analyzeBtn').addEventListener('click', function() {
@@ -635,7 +709,13 @@
             // Reset regex pointer for reuse
             archRegex.lastIndex = 0;
             while ((match = archRegex.exec(inputData)) !== null) {
-                const arch = match[1].trim();
+                let arch = match[1].trim();
+
+                // Truncate architecture features if present
+                if (arch.includes('; features:')) {
+                    arch = arch.split(';')[0].trim();
+                }
+
                 const [LL, LD, DD, WD, WW] = match.slice(2, 7).map(Number);
 
                 if (!archResults[arch]) {
