@@ -126,6 +126,7 @@ const initAutocomplete = (inputId, listId) => {
                                 e.preventDefault();
                                 input.value = user.name;
                                 list.style.display = 'none';
+                                document.getElementById('search-form').requestSubmit();
                             });
                             list.appendChild(item);
                         });
@@ -162,6 +163,11 @@ document.getElementById('search-form').addEventListener('submit', async function
     }
 
     const username = document.getElementById('username').value.trim();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('username', username);
+    window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+
     const playerDataContainer = document.getElementById('playerData');
     playerDataContainer.innerHTML = ''; // Clear previous results
 
@@ -251,6 +257,7 @@ document.getElementById('search-form').addEventListener('submit', async function
             createElement('th', { textContent: 'Player' }),
             createElement('th', { className: 'text-center', textContent: 'Accuracy' }),
             createElement('th', { className: 'text-center', textContent: 'Moves' }),
+            createElement('th', { className: 'text-center', textContent: 'Rating Diff' }),
             createElement('th', { className: 'text-center', textContent: 'Result' }),
             createElement('th', { className: 'text-center', textContent: 'Date' })
         ])
@@ -346,6 +353,12 @@ document.getElementById('search-form').addEventListener('submit', async function
                     }+${gameData.clock.increment} • ` : "";
                     const sourceIconText = gameData.source === "arena" || gameData.source === "swiss" ? " • 🏆" : gameData.source === "simul" ? " • 👨‍👩‍👧‍👦" : "";
 
+                    const isWhite = gameData.players.white.user?.name.toLowerCase() === username.toLowerCase();
+                    const sRating = isWhite ? gameData.players.white.rating : gameData.players.black.rating;
+                    const oRating = isWhite ? gameData.players.black.rating : gameData.players.white.rating;
+                    const rDiff = (sRating && oRating) ? sRating - oRating : null;
+                    const rDiffStr = rDiff !== null ? (rDiff > 0 ? `+${rDiff}` : rDiff) : '-';
+
                     const row = createElement('tr', { className: `text-nowrap position-relative ${gameData.rated ? "rated" : "casual"} ${bannedPlayersClass}` }, [
                         createElement('td', { className: 'bg-transparent' }, [
                             createElement('a', {
@@ -371,6 +384,12 @@ document.getElementById('search-form').addEventListener('submit', async function
                         ]),
                         createElement('td', { className: 'text-center bg-transparent' }, [
                             createElement('span', { textContent: gameData.moves.split(' ').filter((_, i) => i % 2 === 0).length })
+                        ]),
+                        createElement('td', { className: 'text-center bg-transparent' }, [
+                            createElement('span', { 
+                                textContent: rDiffStr,
+                                className: (rDiff !== null && rDiff < -200) ? 'text-danger' : (rDiff !== null && rDiff < -100) ? 'text-warning' : ''
+                            })
                         ]),
                         createElement('td', { className: 'text-center bg-transparent' }, [
                             document.createTextNode(gameData.status.charAt(0).toUpperCase() + gameData.status.slice(1)),
