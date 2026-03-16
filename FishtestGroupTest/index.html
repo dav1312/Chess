@@ -61,7 +61,16 @@
         <main>
             <section class="bg-gray-800 rounded-lg shadow-md p-6 mb-8">
                 <h2 class="text-xl font-semibold text-gray-100 mb-4">Input Data</h2>
-                <textarea id="inputData" rows="5" class="w-full p-3 border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-700 text-gray-100" placeholder="Paste the contents of https://tests.stockfishchess.org/tests/tasks/<id> here..."></textarea>
+                
+                <div class="mb-6 flex flex-col md:flex-row gap-3 items-end">
+                    <div class="flex-grow w-full">
+                        <label for="testLink" class="block text-sm font-medium text-gray-400 mb-1">Test Link or ID</label>
+                        <input type="text" id="testLink" class="w-full p-2 border border-gray-600 rounded-md bg-gray-700 text-gray-100 focus:ring-2 focus:ring-blue-500" placeholder="https://tests.stockfishchess.org/tests/view/67d560c57659714853039d91">
+                    </div>
+                    <button id="openTasksBtn" class="bg-gray-700 hover:bg-gray-600 text-white font-medium py-2 px-4 rounded-md transition-colors border border-gray-600 whitespace-nowrap">Open Tasks Page</button>
+                </div>
+
+                <textarea id="inputData" rows="5" class="w-full p-3 border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-700 text-gray-100" placeholder="Paste the contents of the tasks page here..."></textarea>
                 <button id="analyzeBtn" class="mt-4 bg-blue-700 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors">Analyze Results</button>
             </section>
 
@@ -680,7 +689,25 @@
             });
         }
 
-        // --- Event Handler ---
+        // --- Event Handlers ---
+
+        document.getElementById('openTasksBtn').addEventListener('click', function() {
+            const input = document.getElementById('testLink').value.trim();
+            if (!input) return;
+
+            let id = input;
+            if (input.includes('/view/')) {
+                id = input.split('/view/')[1].split('?')[0].split('#')[0];
+            } else if (input.includes('/tasks/')) {
+                id = input.split('/tasks/')[1].split('?')[0].split('#')[0];
+            }
+
+            if (id) {
+                window.open(`https://tests.stockfishchess.org/tests/tasks/${id}?view=all&sort=idx&order=asc`, '_blank');
+            } else {
+                alert('Please enter a valid Fishtest URL or ID.');
+            }
+        });
 
         document.getElementById('analyzeBtn').addEventListener('click', function() {
             const inputData = document.getElementById('inputData').value;
