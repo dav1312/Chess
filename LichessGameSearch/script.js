@@ -54,6 +54,8 @@ const createElement = (tag, options = {}, children = []) => {
                 console.warn(`Blocked potentially unsafe URL: ${value}`);
             }
             el[key] = value;
+        } else if (key.startsWith('data-')) {
+            el.setAttribute(key, value);
         } else {
             console.warn(`Attempted to set unsafe or unknown property: ${key}`);
         }
@@ -101,22 +103,22 @@ const initAutocomplete = (inputId, listId) => {
                     if (data.result && data.result.length > 0) {
                         list.style.display = 'block';
                         data.result.forEach(user => {
-                            const item = createElement('button', { 
-                                className: 'list-group-item list-group-item-action d-flex align-items-center' 
+                            const item = createElement('button', {
+                                className: 'list-group-item list-group-item-action d-flex align-items-center'
                             });
 
                             if (user.patron) {
                                 const color = patronColors[(user.patronColor || 1) - 1] || patronColors[0];
-                                item.appendChild(createElement('span', { 
-                                    className: 'patron-icon', 
-                                    style: { backgroundColor: color } 
+                                item.appendChild(createElement('span', {
+                                    className: 'patron-icon',
+                                    style: { backgroundColor: color }
                                 }));
                             }
 
                             if (user.title) {
-                                item.appendChild(createElement('span', { 
-                                    className: `px-1 fw-bold font-monospace me-1 ${user.title === "BOT" ? "text-bg-bot" : "text-bg-title"} bg-opacity-100 rounded-1`, 
-                                    textContent: user.title 
+                                item.appendChild(createElement('span', {
+                                    className: `px-1 fw-bold font-monospace me-1 ${user.title === "BOT" ? "text-bg-bot" : "text-bg-title"} bg-opacity-100 rounded-1`,
+                                    textContent: user.title
                                 }));
                             }
 
@@ -145,6 +147,219 @@ const initAutocomplete = (inputId, listId) => {
 
 initAutocomplete('username', 'username-ac');
 initAutocomplete('versus', 'versus-ac');
+
+let lastTimestamp = null;
+let isFetching = false;
+let currentUsername = '';
+
+const fetchGames = async (isNewSearch = false) => {
+    if (isFetching || (!isNewSearch && !lastTimestamp)) return;
+    isFetching = true;
+
+    const username = document.getElementById('username').value.trim();
+    if (isNewSearch) {
+        currentUsername = username;
+        lastTimestamp = null;
+        document.getElementById('results').querySelector('tbody').innerHTML = '';
+    }
+
+    const relativeTime = (epoch) => {
+        const seconds = Math.floor((Date.now() - epoch) / 1000);
+        const units = ['Y', 'M', 'D', 'h', 'm', 's'];
+        const values = [31536000, 2592000, 86400, 3600, 60, 1];
+
+        for (let i = 0; i < units.length; i++) {
+            if (seconds >= values[i]) {
+                return `${Math.floor(seconds / values[i])} ${units[i]} ago`;
+            }
+        }
+
+        return 'Just now';
+    }
+
+    const maxGames = 100;
+    let url = 'https://lichess.org/api/games/user/' + encodeURIComponent(currentUsername) + '?accuracy=true&max=' + maxGames + '&';
+
+    const isAsc = document.getElementById('oldFirst').checked;
+
+    if (isNewSearch) {
+        const until = document.getElementById('until').value;
+        if (until) {
+            url += `&until=${new Date(until).getTime()}`;
+        }
+    } else if (lastTimestamp) {
+        url += isAsc ? `&since=${lastTimestamp + 1}` : `&until=${lastTimestamp - 1}`;
+    }
+
+    if (isAsc) {
+        url += '&sort=dateAsc';
+    }
+    if (document.getElementById('onlyRated').checked) {
+        url += '&rated=true';
+    }
+    const versus = document.getElementById('versus').value.trim();
+    if (versus) {
+        url += `&vs=${encodeURIComponent(versus)}`;
+    }
+    const checkedPerfTypes = Array.from(document.querySelectorAll('input[name="perfType"]:checked'))
+                                    .map(checkbox => checkbox.value);
+    if (checkedPerfTypes.length > 0) {
+        url += `&perfType=${checkedPerfTypes.join(',')}`;
+    }
+
+    const tbody = document.getElementById('results').querySelector('tbody');
+
+    const playerTemplate = (gameData, player, playerColor, suspiciousInfo, username) => {
+        const isUser = "user" in player;
+        const isCurrentUser = isUser && player.user.name.toLowerCase() === username.toLowerCase();
+        const hasTitle = isUser && "title" in player.user;
+        const isAI = "aiLevel" in player;
+        const badge = hasTitle ? player.user.title : isAI ? "SF" : "";
+        const badgeClass = hasTitle ? (player.user.title === "BOT" ? "text-bg-bot" : "text-bg-title") : isAI ? "text-bg-success" : "";
+        const name = isUser ? player.user.name : isAI ? `Stockfish level ${player.aiLevel}` : "Anonymous";
+        const nameClass = isCurrentUser ? `fw-bold ${gameData.winner ? gameData.winner === playerColor ? "text-success" : "text-danger" : ""}` : "";
+        const rating = "rating" in player;
+        const ratingProvisional = rating && player.provisional ? "?" : "";
+        const ratingDiff = "ratingDiff" in player;
+        const ratingDiffClass = player.ratingDiff === 0 ? "" : player.ratingDiff > 0 ? "text-success" : "text-danger";
+        const ratingDiffPrefix = player.ratingDiff === 0 ? "±" : player.ratingDiff > 0 ? "+" : "";
+
+        let outcomeIcon = '';
+        let outcomeTitle = '';
+        if (suspiciousInfo.booster === playerColor) { outcomeIcon = '🔺'; outcomeTitle = 'Potential Boost'; }
+        else if (suspiciousInfo.sandbagger === playerColor) { outcomeIcon = '🔻'; outcomeTitle = 'Potential Sandbag'; }
+
+        const children = [];
+
+        if (isUser && player.user.patron) {
+            const color = patronColors[(player.user.patronColor || 1) - 1] || patronColors[0];
+            children.push(createElement('span', {
+                className: 'patron-icon',
+                style: { backgroundColor: color }
+            }));
+        }
+
+        if (badge) {
+            children.push(createElement('span', { className: `px-1 fw-bold font-monospace ${badgeClass} bg-opacity-100 rounded-1`, textContent: badge }));
+            children.push(' ');
+        }
+        children.push(createElement('span', { className: nameClass, textContent: name }));
+        if (rating) {
+            children.push(` • `);
+            children.push(createElement('span', { textContent: `${player.rating}${ratingProvisional}` }));
+        }
+        if (ratingDiff) {
+            children.push(createElement('span', { className: ratingDiffClass, textContent: ` ${ratingDiffPrefix}${player.ratingDiff}` }));
+        }
+        if (outcomeIcon) {
+            children.push(createElement('span', { title: outcomeTitle, textContent: outcomeIcon }));
+        }
+        return createElement('div', { className: !isCurrentUser ? "notSearchedUser" : "" }, children);
+    };
+
+    const gameAnalysis = (player, username) => {
+        if (!player.analysis) return null;
+        const isUser = "user" in player;
+        const isCurrentUser = isUser && player.user.name.toLowerCase() === username.toLowerCase();
+        const highAccuracy = player.analysis.accuracy >= 95 ? "text-bg-success bg-opacity-100 rounded-1" : "";
+        return createElement('div', { className: !isCurrentUser ? "notSearchedUser" : "" }, [
+            createElement('span', { className: `px-1 ${highAccuracy}`, textContent: `${player.analysis.accuracy}%` })
+        ]);
+    };
+
+    try {
+        const response = await fetch(url, {headers: {'Accept': 'application/x-ndjson'}});
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        let partialLine = "";
+        let count = 0;
+
+        while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = (partialLine + chunk).split('\n');
+            partialLine = lines.pop();
+
+            for (const line of lines) {
+                if (line.trim() !== '') {
+                    const gameData = JSON.parse(line);
+                    const suspiciousInfo = getSuspiciousGameInfo(gameData);
+                    let bannedPlayersClass = "";
+                    if (gameData.rated && gameData.moves.split(' ').length > 18 && !("ratingDiff" in gameData.players.white) && !("ratingDiff" in gameData.players.black)) {
+                        bannedPlayersClass = "bg-danger text-white bg-opacity-25";
+                    }
+
+                    const clockText = "clock" in gameData ? `${
+                        gameData.clock.initial / 60 === 0.5 ? "½" : gameData.clock.initial / 60 === 0.25 ? "¼" : gameData.clock.initial / 60 === 0.75 ? "¾" : gameData.clock.initial / 60
+                    }+${gameData.clock.increment} • ` : "";
+                    const sourceIconText = gameData.source === "arena" || gameData.source === "swiss" ? " • 🏆" : gameData.source === "simul" ? " • 👨‍👩‍👧‍👦" : "";
+
+                    const isWhite = gameData.players.white.user?.name.toLowerCase() === currentUsername.toLowerCase();
+                    const opponent = isWhite ? gameData.players.black.user?.name : gameData.players.white.user?.name;
+                    const sRating = isWhite ? gameData.players.white.rating : gameData.players.black.rating;
+                    const oRating = isWhite ? gameData.players.black.rating : gameData.players.white.rating;
+                    const rDiff = (sRating && oRating) ? sRating - oRating : null;
+                    const rDiffStr = rDiff !== null ? (rDiff > 0 ? `+${rDiff}` : rDiff) : '-';
+
+                    const row = createElement('tr', {
+                        className: `text-nowrap position-relative ${gameData.rated ? "rated" : "casual"} ${bannedPlayersClass}`,
+                        'data-opponent': opponent || ''
+                    }, [
+                        createElement('td', { className: 'bg-transparent' }, [
+                            createElement('a', {
+                                className: 'position-absolute h-100 start-0 top-0 w-100 z-2',
+                                href: `https://lichess.org/${gameData.id}`,
+                                target: '_blank',
+                                rel: 'noopener noreferrer'
+                            }),
+                            createElement('div', {}, [
+                                document.createTextNode(clockText),
+                                createElement('span', { textContent: gameData.speed.charAt(0).toUpperCase() + gameData.speed.slice(1) }),
+                                document.createTextNode(` • ${gameData.rated ? "Rated" : "Casual"}`),
+                                createElement('span', { textContent: sourceIconText })
+                            ])
+                        ]),
+                        createElement('td', { className: 'bg-transparent' }, [
+                            playerTemplate(gameData, gameData.players.white, 'white', suspiciousInfo, currentUsername),
+                            playerTemplate(gameData, gameData.players.black, 'black', suspiciousInfo, currentUsername)
+                        ]),
+                        createElement('td', { className: 'text-center bg-transparent' }, [
+                            gameAnalysis(gameData.players.white, currentUsername),
+                            gameAnalysis(gameData.players.black, currentUsername)
+                        ]),
+                        createElement('td', { className: 'text-center bg-transparent' }, [
+                            createElement('span', { textContent: gameData.moves.split(' ').filter((_, i) => i % 2 === 0).length })
+                        ]),
+                        createElement('td', { className: 'text-center bg-transparent' }, [
+                            createElement('span', {
+                                textContent: rDiffStr,
+                                className: (rDiff !== null && rDiff < -200) ? 'text-danger' : (rDiff !== null && rDiff < -100) ? 'text-warning' : ''
+                            })
+                        ]),
+                        createElement('td', { className: 'text-center bg-transparent' }, [
+                            document.createTextNode(gameData.status.charAt(0).toUpperCase() + gameData.status.slice(1)),
+                            "winner" in gameData ? createElement('span', { textContent: ` • ${gameData.winner.charAt(0).toUpperCase() + gameData.winner.slice(1)} wins` }) : null
+                        ]),
+                        createElement('td', { className: 'text-center bg-transparent' }, [
+                            createElement('span', { textContent: relativeTime(gameData.lastMoveAt) })
+                        ])
+                    ]);
+                    tbody.appendChild(row);
+                    lastTimestamp = gameData.lastMoveAt;
+                    count++;
+                }
+            }
+        }
+        if (count < maxGames) lastTimestamp = null;
+    } catch (err) {
+        console.error(err);
+    } finally {
+        isFetching = false;
+    }
+};
 
 document.getElementById('search-form').addEventListener('submit', async function(e) {
     e.preventDefault();
@@ -225,30 +440,8 @@ document.getElementById('search-form').addEventListener('submit', async function
         playerDataContainer.textContent = 'Error: ' + response.statusText;
     }
 
-    const maxGames = 100;
-    let url = 'https://lichess.org/api/games/user/' + encodeURIComponent(username) + '?accuracy=true&max=' + maxGames + '&';
-    const until = document.getElementById('until').value;
-    if (until) {
-        url += `&until=${new Date(until).getTime()}`;
-    }
-    if (document.getElementById('oldFirst').checked) {
-        url += '&sort=dateAsc';
-    }
-    if (document.getElementById('onlyRated').checked) {
-        url += '&rated=true';
-    }
-    const versus = document.getElementById('versus').value.trim();
-    if (versus) {
-        url += `&vs=${encodeURIComponent(versus)}`;
-    }
-    const checkedPerfTypes = Array.from(document.querySelectorAll('input[name="perfType"]:checked'))
-                                    .map(checkbox => checkbox.value);
-    if (checkedPerfTypes.length > 0) {
-        url += `&perfType=${checkedPerfTypes.join(',')}`;
-    }
-
     const resultsTable = document.getElementById('results');
-    resultsTable.innerHTML = ''; 
+    resultsTable.innerHTML = '';
 
     // Create Results Header
     const thead = createElement('thead', { className: 'bg-body' }, [
@@ -266,145 +459,42 @@ document.getElementById('search-form').addEventListener('submit', async function
     const tbody = createElement('tbody');
     resultsTable.appendChild(tbody);
 
-    const playerTemplate = (gameData, player, playerColor, suspiciousInfo, username) => {
-        const isUser = "user" in player;
-        const isCurrentUser = isUser && player.user.name.toLowerCase() === username.toLowerCase();
-        const hasTitle = isUser && "title" in player.user;
-        const isAI = "aiLevel" in player;
-        const badge = hasTitle ? player.user.title : isAI ? "SF" : "";
-        const badgeClass = hasTitle ? (player.user.title === "BOT" ? "text-bg-bot" : "text-bg-title") : isAI ? "text-bg-success" : "";
-        const name = isUser ? player.user.name : isAI ? `Stockfish level ${player.aiLevel}` : "Anonymous";
-        const nameClass = isCurrentUser ? `fw-bold ${gameData.winner ? gameData.winner === playerColor ? "text-success" : "text-danger" : ""}` : "";
-        const rating = "rating" in player;
-        const ratingProvisional = rating && player.provisional ? "?" : "";
-        const ratingDiff = "ratingDiff" in player;
-        const ratingDiffClass = player.ratingDiff === 0 ? "" : player.ratingDiff > 0 ? "text-success" : "text-danger";
-        const ratingDiffPrefix = player.ratingDiff === 0 ? "±" : player.ratingDiff > 0 ? "+" : "";
+    await fetchGames(true);
+});
 
-        let outcomeIcon = '';
-        let outcomeTitle = '';
-        if (suspiciousInfo.booster === playerColor) { outcomeIcon = '🔺'; outcomeTitle = 'Potential Boost'; }
-        else if (suspiciousInfo.sandbagger === playerColor) { outcomeIcon = '🔻'; outcomeTitle = 'Potential Sandbag'; }
+// Infinite scroll observer
+const observer = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+        fetchGames(false);
+    }
+}, { threshold: 0.1 });
+observer.observe(document.getElementById('loading-sentinel'));
 
-        const children = [];
-        
-        if (isUser && player.user.patron) {
-            const color = patronColors[(player.user.patronColor || 1) - 1] || patronColors[0];
-            children.push(createElement('span', { 
-                className: 'patron-icon', 
-                style: { backgroundColor: color } 
-            }));
-        }
+// Check Opponents Status
+document.getElementById('check-opponents').addEventListener('click', async () => {
+    const rows = Array.from(document.querySelectorAll('#results tbody tr'));
+    const opponents = [...new Set(rows.map(r => r.getAttribute('data-opponent')).filter(n => n))];
 
-        if (badge) {
-            children.push(createElement('span', { className: `px-1 fw-bold font-monospace ${badgeClass} bg-opacity-100 rounded-1`, textContent: badge }));
-            children.push(' ');
-        }
-        children.push(createElement('span', { className: nameClass, textContent: name }));
-        if (rating) {
-            children.push(` • `);
-            children.push(createElement('span', { textContent: `${player.rating}${ratingProvisional}` }));
-        }
-        if (ratingDiff) {
-            children.push(createElement('span', { className: ratingDiffClass, textContent: ` ${ratingDiffPrefix}${player.ratingDiff}` }));
-        }
-        if (outcomeIcon) {
-            children.push(createElement('span', { title: outcomeTitle, textContent: outcomeIcon }));
-        }
-        return createElement('div', { className: !isCurrentUser ? "notSearchedUser" : "" }, children);
-    };
+    if (opponents.length === 0) return;
 
-    const gameAnalysis = (player, username) => {
-        if (!player.analysis) return null;
-        const isUser = "user" in player;
-        const isCurrentUser = isUser && player.user.name.toLowerCase() === username.toLowerCase();
-        const highAccuracy = player.analysis.accuracy >= 95 ? "text-bg-success bg-opacity-100 rounded-1" : "";
-        return createElement('div', { className: !isCurrentUser ? "notSearchedUser" : "" }, [
-            createElement('span', { className: `px-1 ${highAccuracy}`, textContent: `${player.analysis.accuracy}%` })
-        ]);
-    };
+    // Lichess bulk users API (max 300 per request)
+    for (let i = 0; i < opponents.length; i += 300) {
+        const chunk = opponents.slice(i, i + 300);
+        try {
+            const resp = await fetch('https://lichess.org/api/users', {
+                method: 'POST',
+                body: chunk.join(',')
+            });
+            const users = await resp.json();
+            const bannedUsers = new Set(users.filter(u => u.tosViolation).map(u => u.username.toLowerCase()));
 
-    try {
-        response = await fetch(url, {headers: {'Accept': 'application/x-ndjson'}});
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        
-        let partialLine = "";
-
-        while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = (partialLine + chunk).split('\n');
-            partialLine = lines.pop(); // The last element is either empty or a partial line
-
-            for (const line of lines) {
-                if (line.trim() !== '') {
-                    const gameData = JSON.parse(line);
-                    const suspiciousInfo = getSuspiciousGameInfo(gameData);
-                    let bannedPlayersClass = "";
-                    if (gameData.rated && gameData.moves.split(' ').length > 18 && !("ratingDiff" in gameData.players.white) && !("ratingDiff" in gameData.players.black)) {
-                        bannedPlayersClass = "bg-danger text-white bg-opacity-25";
-                    }
-
-                    const clockText = "clock" in gameData ? `${
-                        gameData.clock.initial / 60 === 0.5 ? "½" : gameData.clock.initial / 60 === 0.25 ? "¼" : gameData.clock.initial / 60 === 0.75 ? "¾" : gameData.clock.initial / 60
-                    }+${gameData.clock.increment} • ` : "";
-                    const sourceIconText = gameData.source === "arena" || gameData.source === "swiss" ? " • 🏆" : gameData.source === "simul" ? " • 👨‍👩‍👧‍👦" : "";
-
-                    const isWhite = gameData.players.white.user?.name.toLowerCase() === username.toLowerCase();
-                    const sRating = isWhite ? gameData.players.white.rating : gameData.players.black.rating;
-                    const oRating = isWhite ? gameData.players.black.rating : gameData.players.white.rating;
-                    const rDiff = (sRating && oRating) ? sRating - oRating : null;
-                    const rDiffStr = rDiff !== null ? (rDiff > 0 ? `+${rDiff}` : rDiff) : '-';
-
-                    const row = createElement('tr', { className: `text-nowrap position-relative ${gameData.rated ? "rated" : "casual"} ${bannedPlayersClass}` }, [
-                        createElement('td', { className: 'bg-transparent' }, [
-                            createElement('a', {
-                                className: 'position-absolute h-100 start-0 top-0 w-100 z-2',
-                                href: `https://lichess.org/${gameData.id}`,
-                                target: '_blank',
-                                rel: 'noopener noreferrer'
-                            }),
-                            createElement('div', {}, [
-                                document.createTextNode(clockText),
-                                createElement('span', { textContent: gameData.speed.charAt(0).toUpperCase() + gameData.speed.slice(1) }),
-                                document.createTextNode(` • ${gameData.rated ? "Rated" : "Casual"}`),
-                                createElement('span', { textContent: sourceIconText })
-                            ])
-                        ]),
-                        createElement('td', { className: 'bg-transparent' }, [
-                            playerTemplate(gameData, gameData.players.white, 'white', suspiciousInfo, username),
-                            playerTemplate(gameData, gameData.players.black, 'black', suspiciousInfo, username)
-                        ]),
-                        createElement('td', { className: 'text-center bg-transparent' }, [
-                            gameAnalysis(gameData.players.white, username),
-                            gameAnalysis(gameData.players.black, username)
-                        ]),
-                        createElement('td', { className: 'text-center bg-transparent' }, [
-                            createElement('span', { textContent: gameData.moves.split(' ').filter((_, i) => i % 2 === 0).length })
-                        ]),
-                        createElement('td', { className: 'text-center bg-transparent' }, [
-                            createElement('span', { 
-                                textContent: rDiffStr,
-                                className: (rDiff !== null && rDiff < -200) ? 'text-danger' : (rDiff !== null && rDiff < -100) ? 'text-warning' : ''
-                            })
-                        ]),
-                        createElement('td', { className: 'text-center bg-transparent' }, [
-                            document.createTextNode(gameData.status.charAt(0).toUpperCase() + gameData.status.slice(1)),
-                            "winner" in gameData ? createElement('span', { textContent: ` • ${gameData.winner.charAt(0).toUpperCase() + gameData.winner.slice(1)} wins` }) : null
-                        ]),
-                        createElement('td', { className: 'text-center bg-transparent' }, [
-                            createElement('span', { textContent: relativeTime(gameData.lastMoveAt) })
-                        ])
-                    ]);
-                    tbody.appendChild(row);
+            rows.forEach(row => {
+                const oppName = row.getAttribute('data-opponent')?.toLowerCase();
+                if (bannedUsers.has(oppName)) {
+                    row.classList.add('bg-danger', 'text-white', 'bg-opacity-50');
                 }
-            }
-        }
-    } catch (err) {
-        console.error(err);
+            });
+        } catch (err) { console.error(err); }
     }
 });
 

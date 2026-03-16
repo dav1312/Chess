@@ -95,6 +95,7 @@
                 <label class="input-group-text">Until</label>
                 <input type="date" class="form-control" id="until" name="until">
                 <button type="submit" class="btn btn-primary">Search</button>
+                <button type="button" id="check-opponents" class="btn btn-info">Check Opponents</button>
                 <input type="checkbox" class="btn-check" id="onlySearched" autocomplete="off" checked >
                 <label class="btn btn-outline-secondary" for="onlySearched">Searched</label>
                 <input type="checkbox" class="btn-check" id="onlyRated" autocomplete="off" checked >
@@ -126,6 +127,7 @@
         <div class="table-responsive" >
             <table id="results" class="table table-hover align-middle"></table>
         </div>
+        <div id="loading-sentinel" style="height: 20px;"></div>
     </main>
 </body>
 </html>
