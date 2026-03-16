@@ -690,34 +690,28 @@
                 return;
             }
 
-            // Regex for Architecture results (from existing summary lines)
-            const archRegex = /arch: (.*?) \d{4}-.*? \/ \d+ \[(\d+), (\d+), (\d+), (\d+), (\d+)\]/g;
-
-            // Regex for Compiler results (from detailed log lines, capturing compiler and scores)
-            const compilerRegex = /compiler: (.*?)\..*?;.*?\[(\d+), (\d+), (\d+), (\d+), (\d+)\]/g;
-
-            // Regex for User results (capturing user name and scores)
-            const userRegex = /\d+ (\w+)-\d+cores.*?\[(\d+), (\d+), (\d+), (\d+), (\d+)\]/g;
-
+            // New Regex to handle the table format:
+            // 1: User, 2: Compiler, 3: Arch, 4-8: Pentanomial [LL, LD, DD, WD, WW]
+            const taskRegex = /(\w+)-\d+cores.*?compiler:\s*([^;]+);.*?arch:\s*([^;]+);.*?\[(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\]/g;
 
             const archResults = {};
             const compilerResults = {};
             const userResults = {};
             let match;
 
-            // 1. ARCHITECTURE EXTRACTION
-            // Reset regex pointer for reuse
-            archRegex.lastIndex = 0;
-            while ((match = archRegex.exec(inputData)) !== null) {
-                let arch = match[1].trim();
+            // Process all matches in a single loop
+            while ((match = taskRegex.exec(inputData)) !== null) {
+                const user = match[1].trim();
+                const compiler = match[2].trim();
+                let arch = match[3].trim();
+                const [LL, LD, DD, WD, WW] = match.slice(4, 9).map(Number);
 
                 // Truncate architecture features if present
                 if (arch.includes('; features:')) {
                     arch = arch.split(';')[0].trim();
                 }
 
-                const [LL, LD, DD, WD, WW] = match.slice(2, 7).map(Number);
-
+                // 1. ARCHITECTURE AGGREGATION
                 if (!archResults[arch]) {
                     archResults[arch] = { LL: 0, LD: 0, DD: 0, WD: 0, WW: 0, count: 0 };
                 }
@@ -728,14 +722,8 @@
                 archResults[arch].WD += WD;
                 archResults[arch].WW += WW;
                 archResults[arch].count++;
-            }
 
-            // 2. COMPILER EXTRACTION
-            compilerRegex.lastIndex = 0;
-            while ((match = compilerRegex.exec(inputData)) !== null) {
-                const compiler = match[1].trim();
-                const [LL, LD, DD, WD, WW] = match.slice(2, 7).map(Number);
-
+                // 2. COMPILER AGGREGATION
                 if (!compilerResults[compiler]) {
                     compilerResults[compiler] = { LL: 0, LD: 0, DD: 0, WD: 0, WW: 0, count: 0 };
                 }
@@ -746,15 +734,8 @@
                 compilerResults[compiler].WD += WD;
                 compilerResults[compiler].WW += WW;
                 compilerResults[compiler].count++;
-            }
 
-            // 3. USER EXTRACTION
-            userRegex.lastIndex = 0;
-            while ((match = userRegex.exec(inputData)) !== null) {
-                // match[1] is the (\w+) part (username)
-                const user = match[1].trim();
-                const [LL, LD, DD, WD, WW] = match.slice(2, 7).map(Number);
-
+                // 3. USER AGGREGATION
                 if (!userResults[user]) {
                     userResults[user] = { LL: 0, LD: 0, DD: 0, WD: 0, WW: 0, count: 0 };
                 }
