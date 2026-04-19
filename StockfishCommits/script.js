@@ -325,6 +325,7 @@ function customSortKey(obj) {
         "armv8",
         "armv7-neon",
         "armv7",
+        "x86-64-universal",
         "x86-64-avx512icl",
         "x86-64-vnni512",
         "x86-64-avx512",
