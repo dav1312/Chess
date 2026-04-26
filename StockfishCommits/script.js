@@ -303,6 +303,7 @@ function getOSFromAssetName(assetName) {
     const osMatches = {
         "windows": "Windows",
         "ubuntu": "Linux",
+        "linux": "Linux",
         "android": "ARM",
         "macos": "MacOS"
     };
