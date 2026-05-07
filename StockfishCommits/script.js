@@ -221,17 +221,17 @@ document.getElementById('next').addEventListener('click', nextPage);
 
 async function getLatestRelease() {
     const userOS = getUserOS();
-    const dropdownMenu = document.querySelector("#mainDownloadBtn .dropdown-menu");
+    const mainBtnContainer = document.getElementById("mainDownloadBtn");
     const notUserOSDownloads = document.getElementById("notUserOSDownloads");
 
     if (userOS === "Other") {
         console.log("Unknown userAgent");
         document.getElementById("userOS").textContent = "";
-        document.getElementById("mainDownloadBtn").classList.add("d-none");
+        mainBtnContainer.className = "d-none";
     }
 
     // Clear existing dropdown items and not userOS downloads
-    dropdownMenu.innerHTML = "";
+    mainBtnContainer.innerHTML = "";
     notUserOSDownloads.innerHTML = "";
 
     // Fetch latest release information from GitHub API
@@ -259,21 +259,43 @@ async function getLatestRelease() {
             const osAssets = assetsByOS[userOS];
             if (osAssets && osAssets.length > 0) {
                 document.getElementById("userOS").textContent = "for " + userOS;
-                document.getElementById("mainDownloadBtn").classList.remove("d-none");
 
                 osAssets.sort((a, b) => customSortKey(a) - customSortKey(b));
-                osAssets.forEach(asset => {
-                    const li = document.createElement("li");
+
+                if (osAssets.length === 1) {
+                    mainBtnContainer.className = "";
                     const a = document.createElement("a");
-                    a.className = "dropdown-item";
-                    a.href = asset.browser_download_url;
-                    a.textContent = getAssetName(asset.name);
-                    li.appendChild(a);
-                    dropdownMenu.appendChild(li);
-                });
+                    a.className = "btn btn-primary";
+                    a.href = osAssets[0].browser_download_url;
+                    a.textContent = "Download";
+                    mainBtnContainer.appendChild(a);
+                } else {
+                    mainBtnContainer.className = "input-group";
+                    const btn = document.createElement("button");
+                    btn.className = "btn btn-primary dropdown-toggle";
+                    btn.type = "button";
+                    btn.setAttribute("data-bs-toggle", "dropdown");
+                    btn.textContent = "Download";
+                    mainBtnContainer.appendChild(btn);
+
+                    const ul = document.createElement("ul");
+                    ul.className = "dropdown-menu dropdown-menu-end";
+
+                    osAssets.forEach(asset => {
+                        const li = document.createElement("li");
+                        const a = document.createElement("a");
+                        a.className = "dropdown-item";
+                        a.href = asset.browser_download_url;
+                        a.textContent = getAssetName(asset.name);
+                        li.appendChild(a);
+                        ul.appendChild(li);
+                    });
+
+                    mainBtnContainer.appendChild(ul);
+                }
             } else {
                 document.getElementById("userOS").textContent = "";
-                document.getElementById("mainDownloadBtn").classList.add("d-none");
+                mainBtnContainer.className = "d-none";
             }
 
             // Add not userOS downloads
@@ -292,8 +314,9 @@ async function getLatestRelease() {
 
 function getUserOS() {
     const userAgent = navigator.userAgent.toLowerCase();
+    if (userAgent.includes("win") && userAgent.includes("arm")) return "Windows ARM";
     if (userAgent.includes("win")) return "Windows";
-    if (userAgent.includes("android") || userAgent.includes("raspberry")) return "ARM";
+    if (userAgent.includes("android") || userAgent.includes("raspberry")) return "Android";
     if (userAgent.includes("linux")) return "Linux";
     if (userAgent.includes("mac")) return "MacOS";
     return "Other";
@@ -301,10 +324,11 @@ function getUserOS() {
 
 function getOSFromAssetName(assetName) {
     const osMatches = {
+        "windows-arm": "Windows ARM",
         "windows": "Windows",
         "ubuntu": "Linux",
         "linux": "Linux",
-        "android": "ARM",
+        "android": "Android",
         "macos": "MacOS"
     };
     for (const os in osMatches) {
@@ -322,10 +346,15 @@ function getAssetName(assetName) {
 function customSortKey(obj) {
     const order = [
         "apple-silicon",
+        "macos-arm64",
         "armv8-dotprod",
         "armv8",
         "armv7-neon",
         "armv7",
+        "arm64-dotprod",
+        "arm64",
+        "arm32-neon",
+        "arm32",
         "x86-64-universal",
         "x86-64-avx512icl",
         "x86-64-vnni512",
@@ -356,29 +385,38 @@ function createNotUserOSDiv(os, assets) {
     const notUserOSDiv = document.createElement("div");
     notUserOSDiv.className = "rounded border mt-3 p-3";
 
-    const assetsList = assets.sort((a, b) => customSortKey(a) - customSortKey(b)).map(asset => `
-        <li>
-            <a class="dropdown-item" href="${asset.browser_download_url}">
-                ${getAssetName(asset.name)}
-            </a>
-        </li>`).join('');
+    let downloadHTML = "";
 
-    const dropdownHTML = `
-        <div class="d-flex">
-            <div class="input-group">
-                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                    Download
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    ${assetsList}
-                </ul>
-            </div>
-        </div>`;
+    if (assets.length === 1) {
+        downloadHTML = `
+            <a class="btn btn-secondary" href="${assets[0].browser_download_url}">
+                Download
+            </a>`;
+    } else {
+        const assetsList = assets.sort((a, b) => customSortKey(a) - customSortKey(b)).map(asset => `
+            <li>
+                <a class="dropdown-item" href="${asset.browser_download_url}">
+                    ${getAssetName(asset.name)}
+                </a>
+            </li>`).join('');
+
+        downloadHTML = `
+            <div class="d-flex">
+                <div class="input-group">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        Download
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        ${assetsList}
+                    </ul>
+                </div>
+            </div>`;
+    }
 
     const innerHTML = `
         <div class="d-flex justify-content-between align-items-center">
             <div class="h4 mb-0">${os}</div>
-            ${dropdownHTML}
+            ${downloadHTML}
         </div>`;
 
     notUserOSDiv.innerHTML = innerHTML;
