@@ -18,6 +18,14 @@
         .neutral-llr {
             color: #9ca3af;
         }
+        .pass-llr {
+            color: #3cffbd;
+            font-weight: bold;
+        }
+        .fail-llr {
+            color: #ff3838;
+            font-weight: bold;
+        }
         .table-responsive {
             overflow-x: auto;
         }
@@ -76,6 +84,16 @@
 
             <section id="results" class="hidden">
                 <div class="space-y-8">
+                    <!-- Warning banner for the 5000 limit -->
+                    <div id="warningBanner" class="hidden bg-yellow-900/30 border border-yellow-700 text-yellow-200 p-4 rounded-lg flex items-start gap-3">
+                        <svg class="h-5 w-5 text-yellow-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                        </svg>
+                        <div>
+                            <span class="font-semibold">Warning:</span> Exactly 5000 tasks parsed. Since the tasks page from Fishtest is limited to 5000 items, some tasks might be missing from this analysis.
+                        </div>
+                    </div>
+
                     <!-- Summary Statistics at top -->
                     <div id="summaryStats" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Summary statistics will be populated here -->
@@ -283,6 +301,15 @@
             };
         }
 
+        // Helper function to return styling classes for LLR values
+        function getLlrClass(llr) {
+            if (llr > 2.9444) return 'pass-llr';
+            if (llr < -2.9444) return 'fail-llr';
+            if (llr > 0) return 'positive-llr';
+            if (llr < 0) return 'negative-llr';
+            return 'neutral-llr';
+        }
+
         // Global variables to store data and sort state (Architecture)
         let archData = [];
         let currentSort = { column: 'pentanomial', direction: 'desc' };
@@ -322,9 +349,7 @@
                     const bound = bounds[i];
                     const llrResult = calculatePentanomialLLR(item.data.LL, item.data.LD, item.data.DD, item.data.WD, item.data.WW, bound.elo0, bound.elo1);
 
-                    let llrClass = 'neutral-llr';
-                    if (llrResult.llr > 0) llrClass = 'positive-llr';
-                    else if (llrResult.llr < 0) llrClass = 'negative-llr';
+                    let llrClass = getLlrClass(llrResult.llr);
 
                     llrCells += `<td class="px-4 py-3 whitespace-nowrap text-sm ${llrClass} font-medium">${llrResult.llr.toFixed(4)}</td>`;
                 }
@@ -436,9 +461,7 @@
                     const bound = bounds[i];
                     const llrResult = calculatePentanomialLLR(item.data.LL, item.data.LD, item.data.DD, item.data.WD, item.data.WW, bound.elo0, bound.elo1);
 
-                    let llrClass = 'neutral-llr';
-                    if (llrResult.llr > 0) llrClass = 'positive-llr';
-                    else if (llrResult.llr < 0) llrClass = 'negative-llr';
+                    let llrClass = getLlrClass(llrResult.llr);
 
                     llrCells += `<td class="px-4 py-3 whitespace-nowrap text-sm ${llrClass} font-medium">${llrResult.llr.toFixed(4)}</td>`;
                 }
@@ -547,9 +570,7 @@
                     const bound = bounds[i];
                     const llrResult = calculatePentanomialLLR(item.data.LL, item.data.LD, item.data.DD, item.data.WD, item.data.WW, bound.elo0, bound.elo1);
 
-                    let llrClass = 'neutral-llr';
-                    if (llrResult.llr > 0) llrClass = 'positive-llr';
-                    else if (llrResult.llr < 0) llrClass = 'negative-llr';
+                    let llrClass = getLlrClass(llrResult.llr);
 
                     llrCells += `<td class="px-4 py-3 whitespace-nowrap text-sm ${llrClass} font-medium">${llrResult.llr.toFixed(4)}</td>`;
                 }
@@ -786,6 +807,14 @@
                 return acc;
             }, { LL: 0, LD: 0, DD: 0, WD: 0, WW: 0, count: 0 });
 
+            // Display a warning message if the total tasks count is exactly 5000
+            const warningBanner = document.getElementById('warningBanner');
+            if (totalResults.count === 5000) {
+                warningBanner.classList.remove('hidden');
+            } else {
+                warningBanner.classList.add('hidden');
+            }
+
             const totalResult = calculatePentanomialLLR(totalResults.LL, totalResults.LD, totalResults.DD, totalResults.WD, totalResults.WW, 0, 2);
 
             // Bounds order: 0.5-2.5, 0-2, -1.75-0.25
@@ -800,9 +829,7 @@
             for (const bound of bounds) {
                 const llrResult = calculatePentanomialLLR(totalResults.LL, totalResults.LD, totalResults.DD, totalResults.WD, totalResults.WW, bound.elo0, bound.elo1);
 
-                let llrClass = 'neutral-llr';
-                if (llrResult.llr > 0) llrClass = 'positive-llr';
-                else if (llrResult.llr < 0) llrClass = 'negative-llr';
+                let llrClass = getLlrClass(llrResult.llr);
 
                 overallLLRResults += `
                     <div class="flex justify-between gap-2">
