@@ -314,7 +314,6 @@ async function getLatestRelease() {
 
 function getUserOS() {
     const userAgent = navigator.userAgent.toLowerCase();
-    if (userAgent.includes("win") && userAgent.includes("arm")) return "Windows ARM";
     if (userAgent.includes("win")) return "Windows";
     if (userAgent.includes("android") || userAgent.includes("raspberry")) return "Android";
     if (userAgent.includes("linux")) return "Linux";
@@ -324,7 +323,6 @@ function getUserOS() {
 
 function getOSFromAssetName(assetName) {
     const osMatches = {
-        "windows-arm": "Windows ARM",
         "windows": "Windows",
         "ubuntu": "Linux",
         "linux": "Linux",
@@ -344,17 +342,12 @@ function getAssetName(assetName) {
 }
 
 function customSortKey(obj) {
-    const order = [
+const order = [
+        // --- macOS ARM ---
         "apple-silicon",
         "macos-arm64",
-        "armv8-dotprod",
-        "armv8",
-        "armv7-neon",
-        "armv7",
-        "arm64-dotprod",
-        "arm64",
-        "arm32-neon",
-        "arm32",
+
+        // --- x86 64-bit (Modern Intel / AMD) ---
         "x86-64-universal",
         "x86-64-avx512icl",
         "x86-64-vnni512",
@@ -366,9 +359,27 @@ function customSortKey(obj) {
         "x86-64-ssse3",
         "x86-64-sse3-popcnt",
         "x86-64",
+
+        // --- x86 32-bit (Legacy Intel / AMD) ---
         "x86-32-sse41-popcnt",
         "x86-32-sse2",
         "x86-32",
+
+        // --- ARM 64-bit (AArch64 / ARMv8+) ---
+        "arm64-universal",
+        "arm64-dotprod",
+        "arm64",
+        "armv8-universal",
+        "armv8-dotprod",
+        "armv8",
+
+        // --- ARM 32-bit (AArch32 / ARMv7) ---
+        "arm32-neon",
+        "arm32",
+        "armv7-neon",
+        "armv7",
+
+        // --- Generic Fallbacks ---
         "general-64",
         "general-32",
     ];
