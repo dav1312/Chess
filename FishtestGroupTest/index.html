@@ -1070,8 +1070,8 @@
             if (!input) return;
 
             let id = input;
-            if (input.includes('/view/')) {
-                id = input.split('/view/')[1].split('?')[0].split('#')[0];
+            if (input.includes('/view/') || input.includes('/live_elo/') || input.includes('/stats/')) {
+                id = input.split(/\/(?:view|live_elo|stats)\//)[1].split('?')[0].split('#')[0];
             } else if (input.includes('/tasks/')) {
                 id = input.split('/tasks/')[1].split('?')[0].split('#')[0];
             }
