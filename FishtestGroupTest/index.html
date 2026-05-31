@@ -79,7 +79,15 @@
                 </div>
 
                 <textarea id="inputData" rows="5" class="w-full p-3 border border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-700 text-gray-100" placeholder="Paste the contents of the tasks page here..."></textarea>
-                <button id="analyzeBtn" class="mt-4 bg-blue-700 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors">Analyze Results</button>
+                
+                <div class="mt-4 flex flex-wrap items-center gap-6">
+                    <button id="analyzeBtn" class="bg-blue-700 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition-colors">Analyze Results</button>
+                    <label class="inline-flex items-center cursor-pointer select-none text-gray-300 text-sm">
+                        <input type="checkbox" id="ignorePurgedToggle" class="sr-only peer" checked>
+                        <div class="relative w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                        <span class="ms-3 font-medium text-gray-300">Ignore purged tasks</span>
+                    </label>
+                </div>
             </section>
 
             <section id="results" class="hidden">
@@ -188,10 +196,59 @@
             return (1 / (1 + Math.pow(10, (-elo / 400))));
         }
 
+        // Intercept paste event on the textarea to detect and mark purged tasks
+        document.getElementById('inputData').addEventListener('paste', function(e) {
+            const html = e.clipboardData.getData('text/html');
+            if (!html) return;
+
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const rows = doc.querySelectorAll('tr');
+            if (rows.length === 0) return;
+
+            let pastedText = "";
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 3) return;
+
+                let isPurged = false;
+                for (let td of cells) {
+                    const style = td.getAttribute('style') || '';
+                    if (style.includes('line-through') || 
+                        td.style.textDecoration.includes('line-through') || 
+                        td.style.textDecorationLine.includes('line-through')) {
+                        isPurged = true;
+                        break;
+                    }
+                }
+
+                const cellTexts = Array.from(cells).map((td, index) => {
+                    let txt = td.textContent.trim().replace(/\s+/g, ' ');
+                    if (index === 1 && isPurged) {
+                        txt = `[PURGED] ${txt}`;
+                    }
+                    return txt;
+                });
+
+                pastedText += cellTexts.join('\t') + '\n';
+            });
+
+            if (pastedText.trim()) {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                const text = this.value;
+                this.value = text.substring(0, start) + pastedText + text.substring(end);
+                this.selectionStart = this.selectionEnd = start + pastedText.length;
+                this.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        });
+
         function score_to_nelo_penta(score, std_deviation) {
             return (score - 0.5) / (Math.sqrt(2) * std_deviation) * (800 / Math.LN10);
         }
 
+        // --- Rest of calculations ---
         function score_to_nelo_wdl(score, std_deviation) {
             return (score - 0.5) / (std_deviation) * (800 / Math.LN10);
         }
@@ -710,49 +767,49 @@
             });
         }
 
-        // --- Event Handlers ---
+        // --- Core Analysis Execution Logic ---
 
-        document.getElementById('openTasksBtn').addEventListener('click', function() {
-            const input = document.getElementById('testLink').value.trim();
-            if (!input) return;
-
-            let id = input;
-            if (input.includes('/view/')) {
-                id = input.split('/view/')[1].split('?')[0].split('#')[0];
-            } else if (input.includes('/tasks/')) {
-                id = input.split('/tasks/')[1].split('?')[0].split('#')[0];
-            }
-
-            if (id) {
-                window.open(`https://tests.stockfishchess.org/tests/tasks/${id}?view=all&sort=idx&order=asc`, '_blank');
-            } else {
-                alert('Please enter a valid Fishtest URL or ID.');
-            }
-        });
-
-        document.getElementById('analyzeBtn').addEventListener('click', function() {
+        function analyzeResults(isSilent = false) {
             const inputData = document.getElementById('inputData').value;
+            const ignorePurged = document.getElementById('ignorePurgedToggle').checked;
 
             if (!inputData.trim()) {
-                alert('Please input some data to analyze.');
+                if (!isSilent) {
+                    alert('Please input some data to analyze.');
+                }
                 return;
             }
 
-            // New Regex to handle the table format:
-            // 1: User, 2: Compiler, 3: Arch, 4-8: Pentanomial [LL, LD, DD, WD, WW]
-            const taskRegex = /(\w+)-\d+cores.*?compiler:\s*([^;]+);.*?arch:\s*([^;]+);.*?\[(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\]/g;
+            // Regex configured to capture the optional [PURGED] marker:
+            // 1: Optional [PURGED] marker, 2: User, 3: Compiler, 4: Arch, 5-9: Pentanomial [LL, LD, DD, WD, WW]
+            const taskRegex = /(\[PURGED\]\s+)?(\w+)-\d+cores.*?compiler:\s*([^;]+);.*?arch:\s*([^;]+);.*?\[(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\]/g;
 
             const archResults = {};
             const compilerResults = {};
             const userResults = {};
             let match;
 
+            let activeTasksCount = 0;
+            let purgedTasksCount = 0;
+
             // Process all matches in a single loop
             while ((match = taskRegex.exec(inputData)) !== null) {
-                const user = match[1].trim();
-                const compiler = match[2].trim();
-                let arch = match[3].trim();
-                const [LL, LD, DD, WD, WW] = match.slice(4, 9).map(Number);
+                const isTaskPurged = !!match[1];
+
+                if (isTaskPurged) {
+                    purgedTasksCount++;
+                } else {
+                    activeTasksCount++;
+                }
+
+                if (isTaskPurged && ignorePurged) {
+                    continue;
+                }
+
+                const user = match[2].trim();
+                const compiler = match[3].trim();
+                let arch = match[4].trim();
+                const [LL, LD, DD, WD, WW] = match.slice(5, 10).map(Number);
 
                 // Truncate architecture features if present
                 if (arch.includes('; features:')) {
@@ -809,13 +866,20 @@
 
             // Display a warning message if the total tasks count is exactly 5000
             const warningBanner = document.getElementById('warningBanner');
-            if (totalResults.count === 5000) {
+            const totalParsedTasks = activeTasksCount + purgedTasksCount;
+            if (totalParsedTasks === 5000) {
                 warningBanner.classList.remove('hidden');
             } else {
                 warningBanner.classList.add('hidden');
             }
 
-            const totalResult = calculatePentanomialLLR(totalResults.LL, totalResults.LD, totalResults.DD, totalResults.WD, totalResults.WW, 0, 2);
+            const totalPairsParsed = totalResults.LL + totalResults.LD + totalResults.DD + totalResults.WD + totalResults.WW;
+            let totalResult;
+            if (totalPairsParsed > 0) {
+                totalResult = calculatePentanomialLLR(totalResults.LL, totalResults.LD, totalResults.DD, totalResults.WD, totalResults.WW, 0, 2);
+            } else {
+                totalResult = { score: 0, elo: 0, ci: 0, llr: 0 };
+            }
 
             // Bounds order: 0.5-2.5, 0-2, -1.75-0.25
             const bounds = [
@@ -827,7 +891,9 @@
             // Create Overall LLR results HTML
             let overallLLRResults = '';
             for (const bound of bounds) {
-                const llrResult = calculatePentanomialLLR(totalResults.LL, totalResults.LD, totalResults.DD, totalResults.WD, totalResults.WW, bound.elo0, bound.elo1);
+                const llrResult = totalPairsParsed > 0
+                    ? calculatePentanomialLLR(totalResults.LL, totalResults.LD, totalResults.DD, totalResults.WD, totalResults.WW, bound.elo0, bound.elo1)
+                    : { llr: 0 };
 
                 let llrClass = getLlrClass(llrResult.llr);
 
@@ -846,15 +912,21 @@
 
             // Define summaryStatsDiv before using it
             const summaryStatsDiv = document.getElementById('summaryStats');
+            const purgedOpacityClass = ignorePurged ? 'opacity-40 transition-opacity' : 'transition-opacity';
+
             summaryStatsDiv.innerHTML = `
                 <div class="bg-blue-900/20 rounded p-4">
                     <h3 class="font-semibold text-gray-100 mb-2">Overall Statistics</h3>
                     <div class="text-sm space-y-1">
                         <div class="flex justify-between gap-2">
-                            <span class="text-gray-400">Total Tasks:</span>
-                            <span class="font-medium text-gray-100">${totalResults.count}</span>
+                            <span class="text-gray-400">Active Tasks:</span>
+                            <span class="font-medium text-gray-100">${activeTasksCount}</span>
                         </div>
-                        <div class="flex justify-between gap-2">
+                        <div class="flex justify-between gap-2 ${purgedOpacityClass}">
+                            <span class="text-gray-400">Purged Tasks:</span>
+                            <span class="font-medium text-gray-100">${purgedTasksCount}</span>
+                        </div>
+                        <div class="flex justify-between gap-2 border-t border-gray-700/50 mt-1 pt-1">
                             <span class="text-gray-400">Total Score:</span>
                             <span class="font-medium text-gray-100">${(totalResult.score * 100).toFixed(2)}%</span>
                         </div>
@@ -989,6 +1061,34 @@
 
             // Show the results section
             document.getElementById('results').classList.remove('hidden');
+        }
+
+        // --- Event Handlers ---
+
+        document.getElementById('openTasksBtn').addEventListener('click', function() {
+            const input = document.getElementById('testLink').value.trim();
+            if (!input) return;
+
+            let id = input;
+            if (input.includes('/view/')) {
+                id = input.split('/view/')[1].split('?')[0].split('#')[0];
+            } else if (input.includes('/tasks/')) {
+                id = input.split('/tasks/')[1].split('?')[0].split('#')[0];
+            }
+
+            if (id) {
+                window.open(`https://tests.stockfishchess.org/tests/tasks/${id}?view=all&sort=idx&order=asc`, '_blank');
+            } else {
+                alert('Please enter a valid Fishtest URL or ID.');
+            }
+        });
+
+        document.getElementById('analyzeBtn').addEventListener('click', function() {
+            analyzeResults(false);
+        });
+
+        document.getElementById('ignorePurgedToggle').addEventListener('change', function() {
+            analyzeResults(true);
         });
     </script>
 </body>
