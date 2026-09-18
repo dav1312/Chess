@@ -152,6 +152,70 @@ let lastTimestamp = null;
 let isFetching = false;
 let currentUsername = '';
 
+// Client-side filter states
+let filterOutcome = 'all'; 
+let filterRDiffMin = null; 
+let filterRDiffMax = null; 
+let filterMovesMin = null; 
+let filterMovesMax = null;
+
+const applyClientFilters = () => {
+    const rows = document.querySelectorAll('#results tbody tr');
+    rows.forEach(row => {
+        let visible = true;
+
+        // 1. Outcome Filter
+        if (filterOutcome !== 'all') {
+            const outcome = row.getAttribute('data-outcome');
+            if (outcome !== filterOutcome) {
+                visible = false;
+            }
+        }
+
+        // 2. Rating Difference Filter
+        if (visible) {
+            const rdiffAttr = row.getAttribute('data-rdiff');
+            if (rdiffAttr !== null && rdiffAttr !== '') {
+                const rdiff = parseInt(rdiffAttr, 10);
+                if (filterRDiffMin !== null && rdiff < filterRDiffMin) {
+                    visible = false;
+                }
+                if (filterRDiffMax !== null && rdiff > filterRDiffMax) {
+                    visible = false;
+                }
+            } else {
+                if (filterRDiffMin !== null || filterRDiffMax !== null) {
+                    visible = false;
+                }
+            }
+        }
+
+        // 3. Moves Count Filter
+        if (visible) {
+            const movesAttr = row.getAttribute('data-moves');
+            if (movesAttr !== null && movesAttr !== '') {
+                const moves = parseInt(movesAttr, 10);
+                if (filterMovesMin !== null && moves < filterMovesMin) {
+                    visible = false;
+                }
+                if (filterMovesMax !== null && moves > filterMovesMax) {
+                    visible = false;
+                }
+            } else {
+                if (filterMovesMin !== null || filterMovesMax !== null) {
+                    visible = false;
+                }
+            }
+        }
+
+        if (visible) {
+            row.classList.remove('d-none');
+        } else {
+            row.classList.add('d-none');
+        }
+    });
+};
+
 const fetchGames = async (isNewSearch = false) => {
     if (isFetching || (!isNewSearch && !lastTimestamp)) return;
     isFetching = true;
@@ -297,16 +361,30 @@ const fetchGames = async (isNewSearch = false) => {
                     }+${gameData.clock.increment} • ` : "";
                     const sourceIconText = gameData.source === "arena" || gameData.source === "swiss" ? " • 🏆" : gameData.source === "simul" ? " • 👨‍👩‍👧‍👦" : "";
 
-                    const isWhite = gameData.players.white.user?.name.toLowerCase() === currentUsername.toLowerCase();
+                    const isWhite = gameData.players.white.user?.name?.toLowerCase() === currentUsername.toLowerCase();
                     const opponent = isWhite ? gameData.players.black.user?.name : gameData.players.white.user?.name;
                     const sRating = isWhite ? gameData.players.white.rating : gameData.players.black.rating;
                     const oRating = isWhite ? gameData.players.black.rating : gameData.players.white.rating;
                     const rDiff = (sRating && oRating) ? sRating - oRating : null;
                     const rDiffStr = rDiff !== null ? (rDiff > 0 ? `+${rDiff}` : rDiff) : '-';
 
+                    let searchedOutcome = 'draw';
+                    if (gameData.winner) {
+                        if (gameData.winner === 'white') {
+                            searchedOutcome = isWhite ? 'win' : 'loss';
+                        } else {
+                            searchedOutcome = isWhite ? 'loss' : 'win';
+                        }
+                    }
+
+                    const movesCount = gameData.moves ? gameData.moves.split(' ').filter((_, i) => i % 2 === 0).length : 0;
+
                     const row = createElement('tr', {
                         className: `text-nowrap position-relative ${gameData.rated ? "rated" : "casual"} ${bannedPlayersClass}`,
-                        'data-opponent': opponent || ''
+                        'data-opponent': opponent || '',
+                        'data-outcome': searchedOutcome,
+                        'data-rdiff': rDiff !== null ? rDiff : '',
+                        'data-moves': movesCount
                     }, [
                         createElement('td', { className: 'bg-transparent' }, [
                             createElement('a', {
@@ -331,7 +409,7 @@ const fetchGames = async (isNewSearch = false) => {
                             gameAnalysis(gameData.players.black, currentUsername)
                         ]),
                         createElement('td', { className: 'text-center bg-transparent' }, [
-                            createElement('span', { textContent: gameData.moves.split(' ').filter((_, i) => i % 2 === 0).length })
+                            createElement('span', { textContent: movesCount })
                         ]),
                         createElement('td', { className: 'text-center bg-transparent' }, [
                             createElement('span', {
@@ -354,6 +432,7 @@ const fetchGames = async (isNewSearch = false) => {
             }
         }
         if (count < maxGames) lastTimestamp = null;
+        applyClientFilters();
     } catch (err) {
         console.error(err);
     } finally {
@@ -495,6 +574,158 @@ document.getElementById('check-opponents').addEventListener('click', async () =>
                 }
             });
         } catch (err) { console.error(err); }
+    }
+});
+
+// Setup DOM event listeners for custom filters
+document.addEventListener('DOMContentLoaded', () => {
+    const outcomeMenu = document.getElementById('outcome-filter-menu');
+    if (outcomeMenu) {
+        outcomeMenu.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                outcomeMenu.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                filterOutcome = btn.getAttribute('data-val');
+                document.getElementById('dropdownOutcomeFilter').textContent = `Outcome: ${btn.textContent}`;
+                applyClientFilters();
+            });
+        });
+    }
+
+    // Predefined Rating Differences
+    document.querySelectorAll('.filter-rdiff-pre').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-rdiff-pre').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const minVal = btn.getAttribute('data-min');
+            const maxVal = btn.getAttribute('data-max');
+            
+            document.getElementById('rdiff-min').value = minVal;
+            document.getElementById('rdiff-max').value = maxVal;
+            
+            filterRDiffMin = minVal !== "" && minVal !== null ? parseInt(minVal, 10) : null;
+            filterRDiffMax = maxVal !== "" && maxVal !== null ? parseInt(maxVal, 10) : null;
+            
+            updateRatingDiffLabel();
+            applyClientFilters();
+        });
+    });
+
+    const updateRatingDiffLabel = () => {
+        const btnLabel = document.getElementById('dropdownRatingDiffFilter');
+        if (filterRDiffMin === null && filterRDiffMax === null) {
+            btnLabel.textContent = "Rating Diff: All";
+        } else if (filterRDiffMin !== null && filterRDiffMax === null) {
+            btnLabel.textContent = `Rating Diff: ≥ ${filterRDiffMin > 0 ? '+' : ''}${filterRDiffMin}`;
+        } else if (filterRDiffMin === null && filterRDiffMax !== null) {
+            btnLabel.textContent = `Rating Diff: ≤ ${filterRDiffMax > 0 ? '+' : ''}${filterRDiffMax}`;
+        } else {
+            btnLabel.textContent = `Rating Diff: ${filterRDiffMin} to ${filterRDiffMax}`;
+        }
+    };
+
+    // Custom Rating Diff Range Apply
+    const btnApplyRDiff = document.getElementById('btn-apply-rdiff');
+    if (btnApplyRDiff) {
+        btnApplyRDiff.addEventListener('click', () => {
+            document.querySelectorAll('.filter-rdiff-pre').forEach(b => b.classList.remove('active'));
+            const minVal = document.getElementById('rdiff-min').value;
+            const maxVal = document.getElementById('rdiff-max').value;
+            
+            filterRDiffMin = minVal !== "" ? parseInt(minVal, 10) : null;
+            filterRDiffMax = maxVal !== "" ? parseInt(maxVal, 10) : null;
+            
+            updateRatingDiffLabel();
+            applyClientFilters();
+        });
+    }
+
+    // Custom Rating Diff Range Clear
+    const btnClearRDiff = document.getElementById('btn-clear-rdiff');
+    if (btnClearRDiff) {
+        btnClearRDiff.addEventListener('click', () => {
+            document.querySelectorAll('.filter-rdiff-pre').forEach(b => b.classList.remove('active'));
+            const allBtn = document.querySelector('.filter-rdiff-pre[data-min=""][data-max=""]');
+            if (allBtn) allBtn.classList.add('active');
+            
+            document.getElementById('rdiff-min').value = "";
+            document.getElementById('rdiff-max').value = "";
+            
+            filterRDiffMin = null;
+            filterRDiffMax = null;
+            
+            updateRatingDiffLabel();
+            applyClientFilters();
+        });
+    }
+
+    // Predefined Move Options
+    document.querySelectorAll('.filter-moves-pre').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-moves-pre').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const minVal = btn.getAttribute('data-min');
+            const maxVal = btn.getAttribute('data-max');
+            
+            document.getElementById('moves-min').value = minVal;
+            document.getElementById('moves-max').value = maxVal;
+            
+            filterMovesMin = minVal !== "" && minVal !== null ? parseInt(minVal, 10) : null;
+            filterMovesMax = maxVal !== "" && maxVal !== null ? parseInt(maxVal, 10) : null;
+            
+            updateMovesLabel();
+            applyClientFilters();
+        });
+    });
+
+    const updateMovesLabel = () => {
+        const btnLabel = document.getElementById('dropdownMovesFilter');
+        if (filterMovesMin === null && filterMovesMax === null) {
+            btnLabel.textContent = "Moves: All";
+        } else if (filterMovesMin !== null && filterMovesMax === null) {
+            btnLabel.textContent = `Moves: ≥ ${filterMovesMin}`;
+        } else if (filterMovesMin === null && filterMovesMax !== null) {
+            btnLabel.textContent = `Moves: ≤ ${filterMovesMax}`;
+        } else {
+            btnLabel.textContent = `Moves: ${filterMovesMin}-${filterMovesMax}`;
+        }
+    };
+
+    // Custom Moves Range Apply
+    const btnApplyMoves = document.getElementById('btn-apply-moves');
+    if (btnApplyMoves) {
+        btnApplyMoves.addEventListener('click', () => {
+            document.querySelectorAll('.filter-moves-pre').forEach(b => b.classList.remove('active'));
+            const minVal = document.getElementById('moves-min').value;
+            const maxVal = document.getElementById('moves-max').value;
+            
+            filterMovesMin = minVal !== "" ? parseInt(minVal, 10) : null;
+            filterMovesMax = maxVal !== "" ? parseInt(maxVal, 10) : null;
+            
+            updateMovesLabel();
+            applyClientFilters();
+        });
+    }
+
+    // Custom Moves Range Clear
+    const btnClearMoves = document.getElementById('btn-clear-moves');
+    if (btnClearMoves) {
+        btnClearMoves.addEventListener('click', () => {
+            document.querySelectorAll('.filter-moves-pre').forEach(b => b.classList.remove('active'));
+            const allBtn = document.querySelector('.filter-moves-pre[data-min=""][data-max=""]');
+            if (allBtn) allBtn.classList.add('active');
+            
+            document.getElementById('moves-min').value = "";
+            document.getElementById('moves-max').value = "";
+            
+            filterMovesMin = null;
+            filterMovesMax = null;
+            
+            updateMovesLabel();
+            applyClientFilters();
+        });
     }
 });
 

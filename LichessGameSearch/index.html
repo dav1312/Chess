@@ -62,7 +62,7 @@
             position: relative;
             flex: 1 1 auto;
             min-width: 150px;
-            width: 1%;
+            width: 100%;
         }
 
         .autocomplete-list {
@@ -79,48 +79,160 @@
 </head>
 <body>
     <main class="container-xxl">
-        <h1>Lichess Game Search</h1>
-        <form id="search-form">
-            <div class="input-group mb-3">
-                <label class="input-group-text">Username</label>
-                <div class="autocomplete-container">
-                    <input type="text" class="form-control rounded-0" id="username" required autocomplete="off">
-                    <div id="username-ac" class="autocomplete-list list-group shadow"></div>
+        <h1 class="mb-4">Lichess Game Search</h1>
+        <form id="search-form" class="mb-4">
+            <!-- Row 1: Primary Search Criteria -->
+            <div class="row g-2 align-items-end mb-3">
+                <div class="col-md-3 col-sm-6">
+                    <label for="username" class="form-label mb-1 fw-semibold small text-secondary">Username</label>
+                    <div class="autocomplete-container">
+                        <input type="text" class="form-control" id="username" required autocomplete="off" placeholder="e.g. thibault">
+                        <div id="username-ac" class="autocomplete-list list-group shadow"></div>
+                    </div>
                 </div>
-                <label class="input-group-text">vs</label>
-                <div class="autocomplete-container">
-                    <input type="text" class="form-control rounded-0" id="versus" autocomplete="off">
-                    <div id="versus-ac" class="autocomplete-list list-group shadow"></div>
+                <div class="col-md-3 col-sm-6">
+                    <label for="versus" class="form-label mb-1 fw-semibold small text-secondary">vs Opponent (optional)</label>
+                    <div class="autocomplete-container">
+                        <input type="text" class="form-control" id="versus" autocomplete="off" placeholder="e.g. lancey">
+                        <div id="versus-ac" class="autocomplete-list list-group shadow"></div>
+                    </div>
                 </div>
-                <label class="input-group-text">Until</label>
-                <input type="date" class="form-control" id="until" name="until">
-                <button type="submit" class="btn btn-primary">Search</button>
-                <button type="button" id="check-opponents" class="btn btn-info">Check Opponents</button>
-                <input type="checkbox" class="btn-check" id="onlySearched" autocomplete="off" checked >
-                <label class="btn btn-outline-secondary" for="onlySearched">Searched</label>
-                <input type="checkbox" class="btn-check" id="onlyRated" autocomplete="off" checked >
-                <label class="btn btn-outline-secondary" for="onlyRated">Rated</label>
-                <input type="checkbox" class="btn-check" id="oldFirst" autocomplete="off">
-                <label class="btn btn-outline-secondary" for="oldFirst">Asc date</label>
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownPerfType" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                    Variant
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="dropdownPerfType">
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="ultraBullet"> UltraBullet</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="bullet"> Bullet</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="blitz"> Blitz</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="rapid"> Rapid</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="classical"> Classical</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="correspondence"> Correspondence</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="chess960"> Chess960</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="crazyhouse"> Crazyhouse</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="antichess"> Antichess</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="atomic"> Atomic</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="horde"> Horde</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="kingOfTheHill"> King of the Hill</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="racingKings"> Racing Kings</label></li>
-                    <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="threeCheck"> Three-check</label></li>
-                </ul>
+                <div class="col-md-2 col-sm-4">
+                    <label for="until" class="form-label mb-1 fw-semibold small text-secondary">Until Date</label>
+                    <input type="date" class="form-control" id="until" name="until">
+                </div>
+                <div class="col-md-2 col-sm-4">
+                    <label class="form-label mb-1 fw-semibold small text-secondary d-block">Variant</label>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary w-100 dropdown-toggle" type="button" id="dropdownPerfType" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            Select Variants
+                        </button>
+                        <ul class="dropdown-menu w-100" aria-labelledby="dropdownPerfType" style="max-height: 280px; overflow-y: auto;">
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="ultraBullet" class="form-check-input me-1"> UltraBullet</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="bullet" class="form-check-input me-1"> Bullet</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="blitz" class="form-check-input me-1"> Blitz</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="rapid" class="form-check-input me-1"> Rapid</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="classical" class="form-check-input me-1"> Classical</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="correspondence" class="form-check-input me-1"> Correspondence</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="chess960" class="form-check-input me-1"> Chess960</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="crazyhouse" class="form-check-input me-1"> Crazyhouse</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="antichess" class="form-check-input me-1"> Antichess</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="atomic" class="form-check-input me-1"> Atomic</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="horde" class="form-check-input me-1"> Horde</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="kingOfTheHill" class="form-check-input me-1"> King of the Hill</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="racingKings" class="form-check-input me-1"> Racing Kings</label></li>
+                            <li><label class="dropdown-item"><input type="checkbox" name="perfType" value="threeCheck" class="form-check-input me-1"> Three-check</label></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 d-flex gap-2">
+                    <div class="w-50">
+                        <input type="checkbox" class="btn-check" id="oldFirst" autocomplete="off">
+                        <label class="btn btn-outline-secondary w-100 text-nowrap" for="oldFirst" title="Sort ascending date">Asc date</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-50 text-nowrap">Search</button>
+                </div>
+            </div>
+
+            <!-- Row 2: Secondary Redesigned Filters, Status Toggles & Check Opponents Card -->
+            <div class="card border-secondary bg-dark text-light">
+                <div class="card-body p-3">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-lg-3 col-md-4 col-sm-12">
+                            <button type="button" id="check-opponents" class="btn btn-info w-100 text-nowrap">Check Opponents</button>
+                        </div>
+                        <div class="col-lg-3 col-md-4 col-sm-12 d-flex gap-2">
+                            <input type="checkbox" class="btn-check" id="onlySearched" autocomplete="off" checked>
+                            <label class="btn btn-outline-secondary w-50 text-nowrap" for="onlySearched" title="Show only searched user info details in result cell">Searched</label>
+
+                            <input type="checkbox" class="btn-check" id="onlyRated" autocomplete="off" checked>
+                            <label class="btn btn-outline-secondary w-50 text-nowrap" for="onlyRated">Rated</label>
+                        </div>
+                        <div class="col-lg-6 col-md-4 col-sm-12 d-flex gap-2 justify-content-md-end flex-wrap">
+                            <!-- Filter Won/Lost -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-info dropdown-toggle text-nowrap" type="button" id="dropdownOutcomeFilter" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Outcome: All
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" id="outcome-filter-menu" aria-labelledby="dropdownOutcomeFilter">
+                                    <li><button class="dropdown-item active" type="button" data-val="all">All Outcomes</button></li>
+                                    <li><button class="dropdown-item" type="button" data-val="win">Won Games</button></li>
+                                    <li><button class="dropdown-item" type="button" data-val="loss">Lost Games</button></li>
+                                    <li><button class="dropdown-item" type="button" data-val="draw">Drawn Games</button></li>
+                                </ul>
+                            </div>
+
+                            <!-- Filter Rating Diff -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-info dropdown-toggle text-nowrap" type="button" id="dropdownRatingDiffFilter" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                    Rating Diff: All
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 250px;" aria-labelledby="dropdownRatingDiffFilter">
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold">Predefined Options</label>
+                                        <div class="d-flex flex-column gap-1">
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre active" type="button" data-min="" data-max="">All Difference</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="1" data-max="">Opponent Lower (Diff &gt; 0)</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="" data-max="-1">Opponent Higher (Diff &lt; 0)</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="100" data-max="">Diff &ge; +100</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="" data-max="-100">Diff &le; -100</button>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold">Custom Range</label>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <input type="number" class="form-control form-control-sm" id="rdiff-min" placeholder="Min (e.g. -100)">
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="number" class="form-control form-control-sm" id="rdiff-max" placeholder="Max (e.g. 100)">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-sm btn-primary flex-grow-1" id="btn-apply-rdiff">Apply</button>
+                                        <button type="button" class="btn btn-sm btn-secondary" id="btn-clear-rdiff">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filter Moves -->
+                            <div class="dropdown">
+                                <button class="btn btn-outline-info dropdown-toggle text-nowrap" type="button" id="dropdownMovesFilter" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                    Moves: All
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 250px;" aria-labelledby="dropdownMovesFilter">
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold">Predefined Options</label>
+                                        <div class="d-flex flex-column gap-1">
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-moves-pre active" type="button" data-min="" data-max="">All Move Counts</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-moves-pre" type="button" data-min="" data-max="15">Short (&le; 15 moves)</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-moves-pre" type="button" data-min="16" data-max="40">Medium (16-40 moves)</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-moves-pre" type="button" data-min="41" data-max="">Long (&ge; 41 moves)</button>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <div class="mb-2">
+                                        <label class="form-label small fw-bold">Custom Range</label>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <input type="number" class="form-control form-control-sm" id="moves-min" min="1" placeholder="Min">
+                                            </div>
+                                            <div class="col-6">
+                                                <input type="number" class="form-control form-control-sm" id="moves-max" min="1" placeholder="Max">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-sm btn-primary flex-grow-1" id="btn-apply-moves">Apply</button>
+                                        <button type="button" class="btn btn-sm btn-secondary" id="btn-clear-moves">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </form>
         <div id="playerData" class="row g-3 mb-3"></div>
