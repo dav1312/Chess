@@ -36,6 +36,9 @@
         body:has(#onlyRated:checked) .casual {
             display: none;
         }
+        body:has(#vsBot:checked) .not-vs-bot {
+            display: none;
+        }
         .dropdown-menu {
             --bs-dropdown-zindex: 1021;
         }
@@ -143,10 +146,13 @@
                         </div>
                         <div class="col-lg-3 col-md-4 col-sm-12 d-flex gap-2">
                             <input type="checkbox" class="btn-check" id="onlySearched" autocomplete="off" checked>
-                            <label class="btn btn-outline-secondary w-50 text-nowrap" for="onlySearched" title="Show only searched user info details in result cell">Searched</label>
+                            <label class="btn btn-outline-secondary flex-fill text-nowrap" for="onlySearched" title="Show only searched user info details in result cell">Searched</label>
 
                             <input type="checkbox" class="btn-check" id="onlyRated" autocomplete="off" checked>
-                            <label class="btn btn-outline-secondary w-50 text-nowrap" for="onlyRated">Rated</label>
+                            <label class="btn btn-outline-secondary flex-fill text-nowrap" for="onlyRated">Rated</label>
+
+                            <input type="checkbox" class="btn-check" id="vsBot" autocomplete="off">
+                            <label class="btn btn-outline-secondary flex-fill text-nowrap" for="vsBot" title="Show only games against bots">vs Bot</label>
                         </div>
                         <div class="col-lg-6 col-md-4 col-sm-12 d-flex gap-2 justify-content-md-end flex-wrap">
                             <!-- Filter Won/Lost -->
@@ -155,7 +161,7 @@
                                     Outcome: All
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end" id="outcome-filter-menu" aria-labelledby="dropdownOutcomeFilter">
-                                    <li><button class="dropdown-item active" type="button" data-val="all">All Outcomes</button></li>
+                                    <li><button class="dropdown-item active" type="button" data-val="all">All</button></li>
                                     <li><button class="dropdown-item" type="button" data-val="win">Won Games</button></li>
                                     <li><button class="dropdown-item" type="button" data-val="loss">Lost Games</button></li>
                                     <li><button class="dropdown-item" type="button" data-val="draw">Drawn Games</button></li>
@@ -172,10 +178,10 @@
                                         <label class="form-label small fw-bold">Predefined Options</label>
                                         <div class="d-flex flex-column gap-1">
                                             <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre active" type="button" data-min="" data-max="">All Difference</button>
-                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="1" data-max="">Opponent Lower (Diff &gt; 0)</button>
-                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="" data-max="-1">Opponent Higher (Diff &lt; 0)</button>
-                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="100" data-max="">Diff &ge; +100</button>
-                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="" data-max="-100">Diff &le; -100</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="100" data-max="">Opponent much weaker</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="1" data-max="">Opponent weaker</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="" data-max="-1">Opponent stronger</button>
+                                            <button class="btn btn-sm btn-outline-secondary text-start filter-rdiff-pre" type="button" data-min="" data-max="-100">Opponent much stronger</button>
                                         </div>
                                     </div>
                                     <div class="dropdown-divider"></div>

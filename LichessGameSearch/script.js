@@ -160,6 +160,7 @@ let filterMovesMin = null;
 let filterMovesMax = null;
 
 const applyClientFilters = () => {
+    const isVsBotOnly = document.getElementById('vsBot')?.checked;
     const rows = document.querySelectorAll('#results tbody tr');
     rows.forEach(row => {
         let visible = true;
@@ -208,12 +209,262 @@ const applyClientFilters = () => {
             }
         }
 
+        // 4. Vs Bot Filter
+        if (visible && isVsBotOnly) {
+            const isBot = row.getAttribute('data-vs-bot') === 'true';
+            if (!isBot) {
+                visible = false;
+            }
+        }
+
         if (visible) {
             row.classList.remove('d-none');
         } else {
             row.classList.add('d-none');
         }
     });
+};
+
+const updateUrlParams = () => {
+    const urlParams = new URLSearchParams();
+    const username = document.getElementById('username').value.trim();
+    if (username) urlParams.set('username', username);
+
+    const versus = document.getElementById('versus').value.trim();
+    if (versus) urlParams.set('versus', versus);
+
+    const until = document.getElementById('until').value;
+    if (until) urlParams.set('until', until);
+
+    const checkedPerfTypes = Array.from(document.querySelectorAll('input[name="perfType"]:checked'))
+                                .map(checkbox => checkbox.value);
+    if (checkedPerfTypes.length > 0) {
+        urlParams.set('perfType', checkedPerfTypes.join(','));
+    }
+
+    if (document.getElementById('oldFirst').checked) {
+        urlParams.set('oldFirst', 'true');
+    }
+
+    if (!document.getElementById('onlySearched').checked) {
+        urlParams.set('onlySearched', 'false');
+    }
+
+    if (!document.getElementById('onlyRated').checked) {
+        urlParams.set('onlyRated', 'false');
+    }
+
+    if (document.getElementById('vsBot')?.checked) {
+        urlParams.set('vsBot', 'true');
+    }
+
+    if (filterOutcome && filterOutcome !== 'all') {
+        urlParams.set('outcome', filterOutcome);
+    }
+
+    if (filterRDiffMin !== null && !isNaN(filterRDiffMin)) {
+        urlParams.set('rdiffMin', filterRDiffMin);
+    }
+    if (filterRDiffMax !== null && !isNaN(filterRDiffMax)) {
+        urlParams.set('rdiffMax', filterRDiffMax);
+    }
+
+    if (filterMovesMin !== null && !isNaN(filterMovesMin)) {
+        urlParams.set('movesMin', filterMovesMin);
+    }
+    if (filterMovesMax !== null && !isNaN(filterMovesMax)) {
+        urlParams.set('movesMax', filterMovesMax);
+    }
+
+    const qs = urlParams.toString();
+    const newUrl = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    window.history.replaceState({}, '', newUrl);
+};
+
+const updatePerfTypeLabel = () => {
+    const checked = document.querySelectorAll('input[name="perfType"]:checked');
+    const btn = document.getElementById('dropdownPerfType');
+    if (!btn) return;
+    if (checked.length === 0) {
+        btn.textContent = 'Select Variants';
+    } else if (checked.length === 1) {
+        btn.textContent = checked[0].parentElement.textContent.trim();
+    } else {
+        btn.textContent = `Variants (${checked.length})`;
+    }
+};
+
+const updateRatingDiffLabel = () => {
+    const btnLabel = document.getElementById('dropdownRatingDiffFilter');
+    if (!btnLabel) return;
+    if (filterRDiffMin === null && filterRDiffMax === null) {
+        btnLabel.textContent = "Rating Diff: All";
+    } else if (filterRDiffMin === 100 && filterRDiffMax === null) {
+        btnLabel.textContent = "Rating Diff: ≥ +100";
+    } else if (filterRDiffMin === 1 && filterRDiffMax === null) {
+        btnLabel.textContent = "Rating Diff: > 0";
+    } else if (filterRDiffMin === null && filterRDiffMax === -1) {
+        btnLabel.textContent = "Rating Diff: < 0";
+    } else if (filterRDiffMin === null && filterRDiffMax === -100) {
+        btnLabel.textContent = "Rating Diff: ≤ -100";
+    } else if (filterRDiffMin !== null && filterRDiffMax === null) {
+        btnLabel.textContent = `Rating Diff: ≥ ${filterRDiffMin > 0 ? '+' : ''}${filterRDiffMin}`;
+    } else if (filterRDiffMin === null && filterRDiffMax !== null) {
+        btnLabel.textContent = `Rating Diff: ≤ ${filterRDiffMax > 0 ? '+' : ''}${filterRDiffMax}`;
+    } else {
+        btnLabel.textContent = `Rating Diff: ${filterRDiffMin} to ${filterRDiffMax}`;
+    }
+};
+
+const updateMovesLabel = () => {
+    const btnLabel = document.getElementById('dropdownMovesFilter');
+    if (!btnLabel) return;
+    if (filterMovesMin === null && filterMovesMax === null) {
+        btnLabel.textContent = "Moves: All";
+    } else if (filterMovesMin !== null && filterMovesMax === null) {
+        btnLabel.textContent = `Moves: ≥ ${filterMovesMin}`;
+    } else if (filterMovesMin === null && filterMovesMax !== null) {
+        btnLabel.textContent = `Moves: ≤ ${filterMovesMax}`;
+    } else {
+        btnLabel.textContent = `Moves: ${filterMovesMin}-${filterMovesMax}`;
+    }
+};
+
+const restoreStateFromUrl = () => {
+    const params = new URLSearchParams(window.location.search);
+
+    const userParam = params.get('username');
+    if (userParam) {
+        document.getElementById('username').value = userParam;
+    }
+
+    const versusParam = params.get('versus') || params.get('vs');
+    if (versusParam) {
+        document.getElementById('versus').value = versusParam;
+    }
+
+    const untilParam = params.get('until');
+    if (untilParam) {
+        document.getElementById('until').value = untilParam;
+    }
+
+    const perfTypeParam = params.get('perfType') || params.get('variants') || params.get('variant');
+    if (perfTypeParam) {
+        const types = perfTypeParam.split(',').map(s => s.trim().toLowerCase());
+        document.querySelectorAll('input[name="perfType"]').forEach(cb => {
+            cb.checked = types.includes(cb.value.toLowerCase());
+        });
+        updatePerfTypeLabel();
+    }
+
+    const oldFirstParam = params.get('oldFirst');
+    const sortParam = params.get('sort');
+    if (oldFirstParam === 'true' || oldFirstParam === '1' || sortParam === 'dateAsc') {
+        document.getElementById('oldFirst').checked = true;
+    } else if (oldFirstParam === 'false' || oldFirstParam === '0') {
+        document.getElementById('oldFirst').checked = false;
+    }
+
+    const onlySearchedParam = params.get('onlySearched');
+    if (onlySearchedParam === 'false' || onlySearchedParam === '0') {
+        document.getElementById('onlySearched').checked = false;
+    } else if (onlySearchedParam === 'true' || onlySearchedParam === '1') {
+        document.getElementById('onlySearched').checked = true;
+    }
+
+    const onlyRatedParam = params.get('onlyRated');
+    if (onlyRatedParam === 'false' || onlyRatedParam === '0') {
+        document.getElementById('onlyRated').checked = false;
+    } else if (onlyRatedParam === 'true' || onlyRatedParam === '1') {
+        document.getElementById('onlyRated').checked = true;
+    }
+
+    const vsBotParam = params.get('vsBot');
+    if (vsBotParam === 'true' || vsBotParam === '1') {
+        const vsBotEl = document.getElementById('vsBot');
+        if (vsBotEl) vsBotEl.checked = true;
+    } else if (vsBotParam === 'false' || vsBotParam === '0') {
+        const vsBotEl = document.getElementById('vsBot');
+        if (vsBotEl) vsBotEl.checked = false;
+    }
+
+    const outcomeParam = params.get('outcome');
+    if (outcomeParam && ['all', 'win', 'loss', 'draw'].includes(outcomeParam.toLowerCase())) {
+        filterOutcome = outcomeParam.toLowerCase();
+        const outcomeMenu = document.getElementById('outcome-filter-menu');
+        if (outcomeMenu) {
+            outcomeMenu.querySelectorAll('button').forEach(btn => {
+                if (btn.getAttribute('data-val') === filterOutcome) {
+                    btn.classList.add('active');
+                    document.getElementById('dropdownOutcomeFilter').textContent = `Outcome: ${btn.textContent}`;
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+    }
+
+    const rdiffMinParam = params.get('rdiffMin') ?? params.get('minDiff');
+    const rdiffMaxParam = params.get('rdiffMax') ?? params.get('maxDiff');
+    if (rdiffMinParam !== null || rdiffMaxParam !== null) {
+        filterRDiffMin = (rdiffMinParam !== null && rdiffMinParam !== '') ? parseInt(rdiffMinParam, 10) : null;
+        filterRDiffMax = (rdiffMaxParam !== null && rdiffMaxParam !== '') ? parseInt(rdiffMaxParam, 10) : null;
+        if (Number.isNaN(filterRDiffMin)) filterRDiffMin = null;
+        if (Number.isNaN(filterRDiffMax)) filterRDiffMax = null;
+
+        document.getElementById('rdiff-min').value = filterRDiffMin !== null ? filterRDiffMin : '';
+        document.getElementById('rdiff-max').value = filterRDiffMax !== null ? filterRDiffMax : '';
+
+        let matched = false;
+        document.querySelectorAll('.filter-rdiff-pre').forEach(btn => {
+            const minVal = btn.getAttribute('data-min');
+            const maxVal = btn.getAttribute('data-max');
+            const bMin = minVal !== '' && minVal !== null ? parseInt(minVal, 10) : null;
+            const bMax = maxVal !== '' && maxVal !== null ? parseInt(maxVal, 10) : null;
+            if (bMin === filterRDiffMin && bMax === filterRDiffMax) {
+                btn.classList.add('active');
+                matched = true;
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        if (!matched) {
+            document.querySelectorAll('.filter-rdiff-pre').forEach(b => b.classList.remove('active'));
+        }
+        updateRatingDiffLabel();
+    }
+
+    const movesMinParam = params.get('movesMin') ?? params.get('minMoves');
+    const movesMaxParam = params.get('movesMax') ?? params.get('maxMoves');
+    if (movesMinParam !== null || movesMaxParam !== null) {
+        filterMovesMin = (movesMinParam !== null && movesMinParam !== '') ? parseInt(movesMinParam, 10) : null;
+        filterMovesMax = (movesMaxParam !== null && movesMaxParam !== '') ? parseInt(movesMaxParam, 10) : null;
+        if (Number.isNaN(filterMovesMin)) filterMovesMin = null;
+        if (Number.isNaN(filterMovesMax)) filterMovesMax = null;
+
+        document.getElementById('moves-min').value = filterMovesMin !== null ? filterMovesMin : '';
+        document.getElementById('moves-max').value = filterMovesMax !== null ? filterMovesMax : '';
+
+        let matched = false;
+        document.querySelectorAll('.filter-moves-pre').forEach(btn => {
+            const minVal = btn.getAttribute('data-min');
+            const maxVal = btn.getAttribute('data-max');
+            const bMin = minVal !== '' && minVal !== null ? parseInt(minVal, 10) : null;
+            const bMax = maxVal !== '' && maxVal !== null ? parseInt(maxVal, 10) : null;
+            if (bMin === filterMovesMin && bMax === filterMovesMax) {
+                btn.classList.add('active');
+                matched = true;
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        if (!matched) {
+            document.querySelectorAll('.filter-moves-pre').forEach(b => b.classList.remove('active'));
+        }
+        updateMovesLabel();
+    }
+
+    return userParam;
 };
 
 const fetchGames = async (isNewSearch = false) => {
@@ -239,7 +490,7 @@ const fetchGames = async (isNewSearch = false) => {
         }
 
         return 'Just now';
-    }
+    };
 
     const maxGames = 100;
     let url = 'https://lichess.org/api/games/user/' + encodeURIComponent(currentUsername) + '?accuracy=true&max=' + maxGames + '&';
@@ -363,6 +614,8 @@ const fetchGames = async (isNewSearch = false) => {
 
                     const isWhite = gameData.players.white.user?.name?.toLowerCase() === currentUsername.toLowerCase();
                     const opponent = isWhite ? gameData.players.black.user?.name : gameData.players.white.user?.name;
+                    const opponentPlayer = isWhite ? gameData.players.black : gameData.players.white;
+                    const isOpponentBot = Boolean(opponentPlayer && (opponentPlayer.aiLevel !== undefined || opponentPlayer.user?.title === "BOT"));
                     const sRating = isWhite ? gameData.players.white.rating : gameData.players.black.rating;
                     const oRating = isWhite ? gameData.players.black.rating : gameData.players.white.rating;
                     const rDiff = (sRating && oRating) ? sRating - oRating : null;
@@ -380,11 +633,12 @@ const fetchGames = async (isNewSearch = false) => {
                     const movesCount = gameData.moves ? gameData.moves.split(' ').filter((_, i) => i % 2 === 0).length : 0;
 
                     const row = createElement('tr', {
-                        className: `text-nowrap position-relative ${gameData.rated ? "rated" : "casual"} ${bannedPlayersClass}`,
+                        className: `text-nowrap position-relative ${gameData.rated ? "rated" : "casual"} ${isOpponentBot ? "vs-bot" : "not-vs-bot"} ${bannedPlayersClass}`,
                         'data-opponent': opponent || '',
                         'data-outcome': searchedOutcome,
                         'data-rdiff': rDiff !== null ? rDiff : '',
-                        'data-moves': movesCount
+                        'data-moves': movesCount,
+                        'data-vs-bot': isOpponentBot ? 'true' : 'false'
                     }, [
                         createElement('td', { className: 'bg-transparent' }, [
                             createElement('a', {
@@ -454,13 +708,10 @@ document.getElementById('search-form').addEventListener('submit', async function
         }
 
         return 'Just now';
-    }
+    };
 
     const username = document.getElementById('username').value.trim();
-
-    const urlParams = new URLSearchParams(window.location.search);
-    urlParams.set('username', username);
-    window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+    updateUrlParams();
 
     const playerDataContainer = document.getElementById('playerData');
     playerDataContainer.innerHTML = ''; // Clear previous results
@@ -588,6 +839,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 filterOutcome = btn.getAttribute('data-val');
                 document.getElementById('dropdownOutcomeFilter').textContent = `Outcome: ${btn.textContent}`;
                 applyClientFilters();
+                updateUrlParams();
             });
         });
     }
@@ -609,21 +861,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             updateRatingDiffLabel();
             applyClientFilters();
+            updateUrlParams();
         });
     });
-
-    const updateRatingDiffLabel = () => {
-        const btnLabel = document.getElementById('dropdownRatingDiffFilter');
-        if (filterRDiffMin === null && filterRDiffMax === null) {
-            btnLabel.textContent = "Rating Diff: All";
-        } else if (filterRDiffMin !== null && filterRDiffMax === null) {
-            btnLabel.textContent = `Rating Diff: ≥ ${filterRDiffMin > 0 ? '+' : ''}${filterRDiffMin}`;
-        } else if (filterRDiffMin === null && filterRDiffMax !== null) {
-            btnLabel.textContent = `Rating Diff: ≤ ${filterRDiffMax > 0 ? '+' : ''}${filterRDiffMax}`;
-        } else {
-            btnLabel.textContent = `Rating Diff: ${filterRDiffMin} to ${filterRDiffMax}`;
-        }
-    };
 
     // Custom Rating Diff Range Apply
     const btnApplyRDiff = document.getElementById('btn-apply-rdiff');
@@ -638,6 +878,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             updateRatingDiffLabel();
             applyClientFilters();
+            updateUrlParams();
         });
     }
 
@@ -657,6 +898,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             updateRatingDiffLabel();
             applyClientFilters();
+            updateUrlParams();
         });
     }
 
@@ -677,21 +919,9 @@ document.addEventListener('DOMContentLoaded', () => {
             
             updateMovesLabel();
             applyClientFilters();
+            updateUrlParams();
         });
     });
-
-    const updateMovesLabel = () => {
-        const btnLabel = document.getElementById('dropdownMovesFilter');
-        if (filterMovesMin === null && filterMovesMax === null) {
-            btnLabel.textContent = "Moves: All";
-        } else if (filterMovesMin !== null && filterMovesMax === null) {
-            btnLabel.textContent = `Moves: ≥ ${filterMovesMin}`;
-        } else if (filterMovesMin === null && filterMovesMax !== null) {
-            btnLabel.textContent = `Moves: ≤ ${filterMovesMax}`;
-        } else {
-            btnLabel.textContent = `Moves: ${filterMovesMin}-${filterMovesMax}`;
-        }
-    };
 
     // Custom Moves Range Apply
     const btnApplyMoves = document.getElementById('btn-apply-moves');
@@ -706,6 +936,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             updateMovesLabel();
             applyClientFilters();
+            updateUrlParams();
         });
     }
 
@@ -725,14 +956,49 @@ document.addEventListener('DOMContentLoaded', () => {
             
             updateMovesLabel();
             applyClientFilters();
+            updateUrlParams();
         });
     }
-});
 
-// Auto-trigger search from URL parameter
-const params = new URLSearchParams(window.location.search);
-const userParam = params.get('username');
-if (userParam) {
-    document.getElementById('username').value = userParam;
-    document.getElementById('search-form').requestSubmit();
-}
+    // Listeners for checkbox and field changes to keep URL updated
+    document.querySelectorAll('input[name="perfType"]').forEach(cb => {
+        cb.addEventListener('change', () => {
+            updatePerfTypeLabel();
+            updateUrlParams();
+        });
+    });
+
+    const vsBotEl = document.getElementById('vsBot');
+    if (vsBotEl) {
+        vsBotEl.addEventListener('change', () => {
+            applyClientFilters();
+            updateUrlParams();
+        });
+    }
+
+    const onlySearchedEl = document.getElementById('onlySearched');
+    if (onlySearchedEl) {
+        onlySearchedEl.addEventListener('change', updateUrlParams);
+    }
+
+    const onlyRatedEl = document.getElementById('onlyRated');
+    if (onlyRatedEl) {
+        onlyRatedEl.addEventListener('change', updateUrlParams);
+    }
+
+    const oldFirstEl = document.getElementById('oldFirst');
+    if (oldFirstEl) {
+        oldFirstEl.addEventListener('change', updateUrlParams);
+    }
+
+    const untilEl = document.getElementById('until');
+    if (untilEl) {
+        untilEl.addEventListener('change', updateUrlParams);
+    }
+
+    // Restore state from URL and auto-trigger search if username is present
+    const userParam = restoreStateFromUrl();
+    if (userParam) {
+        document.getElementById('search-form').requestSubmit();
+    }
+});
