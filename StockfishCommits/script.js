@@ -242,7 +242,7 @@ async function getLatestRelease() {
         if (Array.isArray(releasesData) && releasesData.length > 0) {
             document.getElementById("accordionDownload").classList.remove("d-none");
             const latestRelease = releasesData[0];
-            document.getElementById("downloadVersion").title = latestRelease.name;
+            document.getElementById("downloadVersion").textContent = latestRelease.name.split(' ').pop();
 
             // Group assets by OS
             const assetsByOS = {};

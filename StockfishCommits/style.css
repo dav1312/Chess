@@ -40,3 +40,7 @@
 #change-color-theme .nav-link:hover {
     fill: var(--bs-nav-link-hover-color);
 }
+
+header, nav, #accordionDownload {
+    user-select: none;
+}
