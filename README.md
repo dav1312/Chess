@@ -24,6 +24,12 @@ Generate a reusable Lichess challenge link with your custom settings to share wi
 
 ### [Lichess Game Search](https://dav1312.github.io/Chess/LichessGameSearch)
 
+Search and filter chess games from any Lichess.org user.
+
+---
+
+### [Lichess Game Search](https://dav1312.github.io/Chess/LichessGameSearch)
+
 Search and browse public chess games from any Lichess.org user.
 
 ---
@@ -40,7 +46,7 @@ Helper website to fix the output of [Stockfish Graphviz](https://github.com/Diss
 
 ---
 
-### [Winrate Calculator](https://dav1312.github.io/Chess/WinrateCalculator)
+### [Winrate Calculator (old)](https://dav1312.github.io/Chess/WinrateCalculator)
 
 ### [Winrate Calculator Visual](https://dav1312.github.io/Chess/WinrateCalculatorVisual)
 
